@@ -23,7 +23,7 @@
 *.vrb
 *.xdv
 
-*.pdf
+
 
 .DS_Store
 Thumbs.db

@@ -1,0 +1,123 @@
+\documentclass[12pt,a4paper]{article}
+
+% --- Pacchetti Fondamentali ---
+\usepackage[utf8]{inputenc}         % Codifica input
+\usepackage[T1]{fontenc}            % Codifica font
+\usepackage[italian]{babel}         % Lingua italiana
+\usepackage{geometry}               % Gestione margini
+ \geometry{a4paper, margin=2.5cm}
+\usepackage{graphicx}               % Inserimento immagini
+\usepackage{hyperref}               % Link cliccabili
+\usepackage{enumitem}               % Liste personalizzate
+\usepackage{booktabs}               % Tabelle professionali
+\usepackage{eso-pic}                % Per inserire immagini in posizioni assolute
+\usepackage{tikz}                   % Disegno vettoriale per il posizionamento
+
+% --- Configurazione Hyperref ---
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Relazione Progetto Rete},
+}
+
+% --- Inizio Documento ---
+\begin{document}
+
+\AddToShipoutPictureBG*{%
+  \begin{tikzpicture}[remember picture, overlay]
+    \node [anchor=north west, inner sep=30pt] at (current page.north west)
+      {\includegraphics[height=1.5cm]{Misc/diem (1).png}};
+  \end{tikzpicture}
+}
+
+
+
+
+% ==========================================
+% FRONTESPIZIO
+% ==========================================
+\begin{titlepage}
+ 
+    \centering
+    \vspace*{1cm}
+    \large \textbf{UNIVERSITÀ DEGLI STUDI DI SALERNO} \\
+    \large Corso di Laurea in Ingegneria Informatica \\
+    \vspace{0.5cm}
+    \rule{\linewidth}{0.2pt} \\
+    \vspace{0.5cm}
+    \large Corso: \textbf{Tecnologie Elettriche per l'Informatica Industriale} \\
+    \large Anno Accademico: \textbf{2025/2026} \\
+    
+    \vspace{2.5cm}
+    
+    \LARGE \textbf{Studio e caratterizzazione di sensori  } \\
+    \Large  \textbf{Sensore di XXXX} \\
+    
+    \vspace{1.5cm}
+    
+    \large \textbf{Numero del Gruppo: 100} \\
+    
+    \vspace{2cm}
+    
+    \begin{table}[h]
+        \centering
+        \begin{tabular}{lll}
+            \textbf{Nome} & \textbf{Cognome} & \textbf{Matricola} \\
+            \midrule
+            Riccardo  & La Porta & 0612709691 \\
+            Lorenzo & Allocco & 061270xxxx \\
+            
+        \end{tabular}
+    \end{table}
+
+    \vfill
+    \rule{\linewidth}{0.2pt} \\
+    \vspace{0.2cm}
+    \large Data di consegna: \today
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% ==========================================
+% INTRODUZIONE
+% ==========================================
+\section{Introduzione}
+\textit{Nota: Massimo 2 pagine.}
+
+\section{Sensore scelto e realtà di interesse}
+Descrizione breve della realtà di interesse relativa alla traccia numero X.
+
+\section{Obiettivo del progetto}
+Cosa si prefigge di ottenere questa configurazione di rete?
+
+\section{Descrizione preliminare e assunzioni}
+Descrizione sintetica dell'approccio. Indicare qui eventuali assunzioni fatte (es. "Si assume che il traffico esterno sia filtrato da un firewall perimetrale non oggetto di questa relazione") e limitazioni del sistema implementato.
+
+% ==========================================
+% PROGETTAZIONE
+% ==========================================
+\section{Caratteristiche fisiche}
+
+\section{Specifiche caratteristiche elettriche}
+Elenco delle specifiche tecniche richieste dalla traccia.
+
+
+
+
+
+\subsection{Ambiti di applicazione}
+Dettagli sulla configurazione dei router, switch e server (es. DHCP, DNS, Web Server).
+
+\subsection{Verifica e sperimentazione}
+Risultati dei test (es. output di \texttt{ping}, \texttt{traceroute} o tabelle di routing) che dimostrano il corretto funzionamento.
+
+% ==========================================
+% CONCLUSIONI
+% ==========================================
+\section{Conclusioni e sviluppi futuri}
+Riflessioni finali sul lavoro svolto e possibili miglioramenti o espansioni della rete progettata.
+
+\end{document}

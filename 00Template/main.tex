@@ -9,6 +9,8 @@
 \usepackage{float}
 \usepackage{eso-pic} % for \BgThispage
 \usepackage{tikz}
+\usepackage{enumitem}
+\usepackage{xcolor-solarized}
 \usepackage[pages=some]{background}
 \usepackage[italian]{babel}
 \backgroundsetup{scale=1.5,anchor=right,angle=0,opacity=0.1,contents={\includegraphics[scale=1]{Misc/logo_standard (1).png}}}
@@ -23,10 +25,21 @@
 
 
 
-\title{Relazione: TITOLO}
-\author{Gruppo XX - Nome Cognome - Mat. 061270XXXX}
-\date{Data: GG MM AAAA}
-
+\title{
+    Relazione : Oscilloscopio \\ 
+    \vspace{0.3cm} 
+    \Large Gruppo 100
+}
+\author{
+  Lorenzo Allocco \\ -- Mat. 061270XXXX
+  \and
+  Riccardo La Porta \\ -- Mat. 0612709691
+  \and 
+  Francesco Grimaldi \\ -- Mat.0612708839
+  \and
+  Alessandro Altieri \\ -- Mat.0612709239
+}
+\date{5 Marzo 2026}
 \begin{document}
 \AddToShipoutPictureBG*{%
   \begin{tikzpicture}[remember picture, overlay]
@@ -39,26 +52,64 @@
 \newpage
 \tableofcontents
 \newpage
-\section{Obiettivi della prova}
+\section{Obiettivi dell'esperienza}
+La seguente relazione si pone come obiettivo quello di descrivere l'esperienza di laboratorio tenutasi
+nell'ambito del corso di Tecnologie Elettriche per l'informatica Industriale.\\
+Lo scopo è quello di introdurre lo studente all'utilizzo e alla comprensione dell'Oscilloscopio come strumento di misura, nonchè
+comprendere la sua applicazione nello studio e nell'analisi di segnali elettrici.
+\\
+\\
+L'attività pratica di laboratorio si suddivide in 3 fasi:
+\
+\begin{itemize}
+    \item Misura del segnale di calibrazione
+    \item Calibrazione dello strumento
+    \item Compensazione capacitiva della sonda
+\end{itemize}
 \newpage
 
-\section{Schemi}
+\section{Introduzione e cenni teorici}
+Il setup sperimentale prevede il collegamento diretto tra il generatore di segnali integrato dello strumento e l'ingresso del canale 1 (CH1) dell'oscilloscopio.
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.6\textwidth]{Schema_Collegamento}
+    \small (In questa sezione andrebbe inserito lo schema circuitale o una foto del setup)
+    \caption{Schema del collegamento tra generatore e oscilloscopio.}
+\end{figure}
 \newpage
 
-\section{Elenco dei componenti}
+
+\section{Strumentazione e Componenti}
+Per lo svolgimento di questa esperienza di laboratorio non si sono resi necessari ulteriori componenti.
+
 \newpage
 
-\section{Strumenti utilizzati}
+\section{Schema del Circuito e Procedura Sperimentale}
+La strumentazione utilizzata durante l'esperienza è elencata nella tabella seguente:
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{|X|X|X|}
+\hline
+\textbf{Strumento} & \textbf{Modello} & \textbf{Caratteristiche} \\ \hline
+Oscilloscopio Digitale & Hantek 6022BL & 2 canali, 20 MHz, 48 MS/s \\ \hline
+Generatore di Funzioni per la calibrazione & Hantek 6022BL & Integrato nello strumento \\ \hline
+Software & DPO & Software per macchine Windows \\ \hline
+Software & OpenHantek & Software open source disponibile su macchine linux \\ \hline
+\end{tabularx}
+\caption{Specifiche della strumentazione di laboratorio.}
+\end{table}
 \newpage
 
-\section{Descrizione delle misure effettuate}
+\section{Raccolta e Analisi dei Dati Sperimentali}
+
 \newpage
 
-\section{Risultati}
+\section{Discussione dei Risultati}
 \newpage
 
 \section{Conclusioni}
 \newpage
 
 \end{document}
-

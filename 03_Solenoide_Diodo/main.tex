@@ -42,9 +42,9 @@
     \Large Gruppo 100
 }
 \author{
-  Lorenzo Allocco \\ -- Mat. 061270XXXX
-  \and
   Riccardo La Porta \\ -- Mat. 0612709691
+  \and
+  Lorenzo Allocco \\ -- Mat. 061270XXXX
 }
 \date{5 Marzo 2026}
 \begin{document}
@@ -68,18 +68,7 @@ Inoltre, è stato analizzato il ruolo fondamentale del diodo di freewheeling (o 
 \newpage
 
 \section{Introduzione e cenni teorici}
-
-
-\begin{figure}[H]
-    \centering
-    % \includegraphics[width=0.6\textwidth]{Schema_Collegamento}
-    \small (In questa sezione andrebbe inserito lo schema circuitale o una foto del setup)
-    \caption{Schema del collegamento tra generatore e oscilloscopio.}
-\end{figure}
 \newpage
-
-
-
 
 
 \section{Strumentazione e componenti utilizzati}
@@ -105,8 +94,8 @@ I componenti utilizzati durante l'esperienza sono elencati nella tabella seguent
 \hline
 \textbf{Componente} & \textbf{Modello} & \textbf{Caratteristiche} \\ \hline
 Elettromagnete Solenoide & TAU-0730TM & 12V DC, $40\Omega$, 0.5N spinta,   \\ \hline
-Diodo & TO-220AB & 600V, 1A, General Purpose\\ \hline
-Transistor BJT & BDX33B& NPN Darlington, 80V, 10A \\ \hline
+Diodo & FEP16DT & 200V, 16A\\ \hline
+Transistor BJT & BDX33C& NPN Darlington, 100V, 10A \\ \hline
 Resistore&  Resistore & 1K$\Omega$ \\ \hline
 \end{tabularx}
 \caption{Componenti utilizzati.}
@@ -114,10 +103,57 @@ Resistore&  Resistore & 1K$\Omega$ \\ \hline
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{Misc/attuatore.png}
+    \includegraphics[width=0.6\textwidth]{Misc/attuatore.png}
     \caption{Elettromagnete solenoide TAU-0730TM.}
 \end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{Misc/dettaglio_componenti.jpg}
+    \caption{Da sinistra : resistore 1K$\Omega$, transistor BDX33C, diodo FEP16DT.}
+    \label{fig:dettaglio_componenti}
+\end{figure}
 \newpage
+
+
+
+\section{Schema del circuito e procedura sperimentale}
+Il circuito realizzato permette di pilotare il solenoide attraverso un transistor BJT NPN. Il segnale di comando viene inviato alla base del transistor, il quale agisce come interruttore per far fluire corrente attraverso il carico induttivo. Successivamente, in parallelo al solenoide, viene inserito il diodo di freewheeling connesso in polarizzazione inversa rispetto all'alimentazione principale.
+
+\begin{figure}[H]
+    \centering
+    %\includegraphics[width=0.8\textwidth]{Misc/Schema_Collegamento.png}
+    \caption{INSERIRE INSERIRE Schema del collegamento dei componenti per il pilotaggio del solenoide.}
+    \label{fig:schema_collegamento}
+\end{figure}
+
+
+
+    \subsection{Circuito di pilotaggio base} 
+     Viene assemblato il circuito base senza diodo di protezione. Le sonde dell'oscilloscopio vengono collegate per monitorare l'onda quadra in ingresso e la tensione ai capi del solenoide, al fine di evidenziare la differenza, e quindi lo spike di sovratensione induttiva.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\textwidth]{Misc/misura_nodiodo.jpg}
+        \caption{Foto del setup sperimentale con i componenti collegati su breadboard.}
+        \label{fig:setup_sperimentale_no_diodo}
+    \end{figure}
+    \newpage
+
+    
+    
+     \subsection{Circuito con diodo di freewheeling}
+    Si integra poi il diodo all'interno del circuito per fornire un percorso di scarica alla corrente. Si effettuano nuovamente le misurazioni per verificare l'eliminazione del picco di tensione inversa durante il transitorio.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\textwidth]{Misc/misura_diodo.jpg}
+        \caption{Foto del setup sperimentale con i componenti collegati su breadboard.}
+        \label{fig:setup_sperimentale}
+    \end{figure}
+
+\newpage
+
+
 
 \section{Raccolta e Analisi dei dati sperimentali}
 In questa fase dell'esperimento sono state effettuate diverse misurazioni per osservare il comportamento del solenoide durante le fasi di eccitazione e diseccitazione, con particolare attenzione ai transitori di tensione.

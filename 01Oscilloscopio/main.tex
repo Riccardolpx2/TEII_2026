@@ -89,6 +89,29 @@ e il cavo della sonda introduce un'ulteriore capacità, l'intero sistema necessi
 Per evitare che il sistema distorca i segnali, attenuando o amplificando erroneamente le componenti ad alta frequenza, è necessario agire sul trimmer capacitivo istallato sul corpo della sonda stessa. 
 A livello teorico, la risposta in frequenza risulta piatta solo se la costante di tempo della sonda è perfettamente uguale a quella del circuito d'ingresso dell'oscilloscopio ($R_{sonda} \cdot C_{sonda} = R_{in} \cdot C_{in}$).
 
+\subsection*{Modello circuitale e funzione di trasferimento}
+Analizzando il sistema sonda-oscilloscopio mediante un modello circuitale semplificato, questo può essere modellato come un partitore di tensione compensato in frequenza. Siano $Z_{sonda}$ e $Z_{in}$ rispettivamente l'impedenza della sonda e dell'ingresso dell'oscilloscopio. 
+La tensione misurata dall'oscilloscopio $V_{out}$ rispetto alla tensione del segnale da misurare $V_{in}$ è data dalla funzione di trasferimento:
+\begin{equation}
+    H(j\omega) = \frac{V_{out}}{V_{in}} = \frac{Z_{in}}{Z_{in} + Z_{sonda}}
+\end{equation}
+
+Esplicitando le impedenze come parallelo di resistenze e capacità ($Z = \frac{R}{1 + j\omega RC}$), si ottiene:
+\begin{equation}
+    H(j\omega) = \left( \frac{R_{in}}{R_{in} + R_{sonda}} \right) \frac{1 + j\omega R_{sonda} C_{sonda}}{1 + j\omega (R_{in} \parallel R_{sonda})(C_{in} + C_{sonda})}
+\end{equation}
+
+Affinché l'attenuazione sia indipendente dalla frequenza del segnale in ingresso, la dipendenza da $\omega$ deve annullarsi. Ciò si verifica matematicamente quando le due costanti di tempo si eguagliano:
+\begin{equation}
+    \tau_{sonda} = R_{sonda} C_{sonda} = R_{in} C_{in} = \tau_{in}
+\end{equation}
+
+In questa condizione ideale, la funzione di trasferimento diventa puramente resistiva e pari al fattore di attenuazione nominale della sonda (es. $1/10$ per una sonda 10X):
+\begin{equation}
+    H(j\omega) = \frac{R_{in}}{R_{in} + R_{sonda}}
+\end{equation}
+Questo garantisce che tutte le componenti in frequenza (come le innumerevoli armoniche che compongono un'onda quadra di calibrazione) vengano attenuate in egual misura, preservando l'integrità della forma d'onda visualizzata a schermo.
+
 \newpage
 
 \section{Strumentazione e Componenti}
@@ -100,12 +123,21 @@ La strumentazione utilizzata durante l'esperienza è elencata nella tabella segu
 \hline
 \textbf{Strumento} & \textbf{Modello} & \textbf{Caratteristiche} \\ \hline
 Oscilloscopio Digitale & Hantek 6022BL & 2 canali, 20 MHz, 48 MS/s \\ \hline
-Generatore di Funzioni per la calibrazione & Hantek 6022BL & Integrato nello strumento \\ \hline
+Generatore di onda quadra per la calibrazione & Hantek 6022BL & Integrato nello strumento \\ \hline
 Software & DPO & Software per macchine Windows \\ \hline
 Software & OpenHantek & Software open source disponibile su macchine linux \\ \hline
 \end{tabularx}
 \caption{Specifiche della strumentazione di laboratorio.}
 \end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{Misc/oscilloscopio.png}
+    \caption{Oscilloscopio Hantek 6022BL.}
+\end{figure}
+
+
+
 \newpage
 
 
@@ -115,7 +147,7 @@ Il setup sperimentale per questa fase prevede il collegamento diretto tra il gen
 
 
 
-All'atto pratico, la compensazione si ottiene collegando la sonda al segnale di calibrazione dell'oscilloscopio (che fornisce un'onda quadra di riferimento nota) e regolando il condensatore variabile (trimmer) posto all'interno della sonda. L'obiettivo è ottenere a schermo un'onda quadra perfetta:
+All'atto pratico, la compensazione si ottiene collegando la sonda al segnale di calibrazione dell'oscilloscopio (che fornisce un'onda quadra di riferimento a \textbf{1kHz}) e regolando il condensatore variabile (trimmer) posto all'interno della sonda. L'obiettivo è ottenere a schermo un'onda quadra perfetta:
 \begin{itemize}
     \item Se i fronti sono arrotondati, la sonda è \textbf{sottocompensata} (si comporta come un filtro passa-basso).
     \item Se i fronti presentano un picco o sovraelongazione (overshoot), la sonda è \textbf{sovracompensata} (filtro passa-alto).

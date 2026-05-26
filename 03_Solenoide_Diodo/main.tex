@@ -9,6 +9,7 @@
 \usepackage{float}
 \usepackage{eso-pic} % for \BgThispage
 \usepackage{tikz}
+\usepackage{hyperref}
 \usepackage[pages=some]{background}
 \usepackage[italian]{babel}
 \backgroundsetup{scale=1.5,anchor=right,angle=0,opacity=0.1,contents={\includegraphics[scale=1]{Misc/logo_standard (1).png}}}
@@ -21,6 +22,13 @@
 %    \caption{Commento dell'immagine}
 %    \end{figure}
 
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Relazione tecnica Elettroattuatore e diodo di freewheeling - TEII},
+}
 
 
 \title{
@@ -51,7 +59,11 @@
 \section{Obiettivi dell'esperienza}
 La seguente relazione si pone come obiettivo quello di descrivere l'esperienza di laboratorio tenutasi
 nell'ambito del corso di Tecnologie Elettriche per l'informatica Industriale.\\
-Lo scopo è quello 
+In particolare, questa esperienza si è focalizzata sul funzionamento di un magnete solenoide pilotato da raspberry tramite transistor BJT
+e degli effetti induttivi generati dal suo funzionamento. 
+Inoltre, è stato analizzato il ruolo fondamentale del diodo di freewheeling (o di ricircolo) nella protezione dei componenti elettronici dalle sovratensioni generate dall'interruzione della corrente in un carico induttivo.
+
+
 \newpage
 
 \section{Introduzione e cenni teoritici}
@@ -100,21 +112,65 @@ Transistor BJT & BDX33B& NPN Darlington, 80V, 10A \\ \hline
 
 \begin{figure}[H]
     \centering
-    %%\includegraphics[width=0.6\textwidth]{Misc/attuatore.png}
-    \small (In questa sezione andrebbe inserito lo schema circuitale o una foto del setup)
+    \includegraphics[width=0.9\textwidth]{Misc/attuatore.png}
     \caption{Elettromagnete solenoide TAU-0730TM.}
 \end{figure}
 \newpage
 \newpage
 
 \section{Raccolta e Analisi dei dati sperimentali}
+In questa fase dell'esperimento sono state effettuate diverse misurazioni per osservare il comportamento del solenoide durante le fasi di eccitazione e diseccitazione, con particolare attenzione ai transitori di tensione.
+
+\subsection{Analisi del transitorio senza diodo di freewheeling}
+Inizialmente è stato configurato il circuito pilotando il solenoide tramite il transistor BJT senza l'ausilio del diodo di protezione. All'apertura del circuito (interruzione della corrente nel carico induttivo), l'oscilloscopio ha rilevato un picco di tensione inversa molto elevato (sovratensione induttiva).
+Questo fenomeno è dovuto alla legge di Faraday-Lenz:
+\begin{equation}
+    V_L = L \frac{di}{dt}
+\end{equation}
+Poiché la variazione di corrente $di$ avviene in un tempo $dt$ estremamente ridotto, la tensione generata tende a valori teoricamente infiniti, rischiando di danneggiare la giunzione del transistor.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Misc/no_diodo.png}
+    \caption{Misurazione all'oscilloscopio del transitorio senza diodo di freewheeling.}
+    \label{fig:transitorio_senza_diodo}
+\end{figure}
+
+Analizzando la traccia acquisita dall'oscilloscopio, riportata in figura \ref{fig:transitorio_senza_diodo}, si osserva in giallo il segnale utilizzato per il pilotaggio del transistor. In azzurro è invece rappresentata la tensione ai capi del solenoide, in cui risulta evidente il picco (spike) di sovratensione induttiva che si genera all'istante di apertura del circuito.
+
+\subsection{Analisi del transitorio con diodo di freewheeling}
+Successivamente è stato inserito il diodo in parallelo al solenoide, con il catodo rivolto verso l'alimentazione positiva. In questa configurazione, nel momento in cui il transistor smette di condurre, il diodo entra in conduzione diretta offrendo un cammino a bassa impedenza per la corrente accumulata nell'induttore.
+Le osservazioni effettuate mostrano che:
+\begin{itemize}
+    \item La tensione ai capi del transistor viene limitata a $V_{CC} + V_F$ (dove $V_F$ è la tensione di soglia del diodo).
+    \item L'energia immagazzinata nel campo magnetico viene dissipata gradualmente attraverso la resistenza interna del solenoide e del diodo stesso.
+    \item Il tempo di rilascio meccanico dell'attuatore risulta leggermente superiore rispetto al caso senza diodo, a causa del prolungamento della circolazione di corrente.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Misc/diodo.png}
+    \caption{Misurazione all'oscilloscopio del transitorio con diodo freewheeling.}
+    \label{fig:transitorio_con_diodo}
+\end{figure}
+
+Analizzando la traccia riportata in figura \ref{fig:transitorio_con_diodo}, si nota nuovamente in giallo il segnale di pilotaggio del transistor e in azzurro la tensione misurata ai capi del solenoide. A differenza del caso precedente, l'inserimento del diodo di freewheeling abbatte completamente lo spike di sovratensione all'apertura del circuito. La tensione in eccesso viene infatti limitata (clamping) 
+permettendo lo scaricamento dell'energia accumulata nell'induttore, proteggendo il circuito.
+Si nota che le due forme d'onda corrispondo quasi perfettamente
+
+
 \newpage
 
 \section{Risultati}
+
 \newpage
 
 \section{Conclusioni}
+In conclusione, l'esperienza di laboratorio ha permesso di verificare sperimentalmente il comportamento di un carico induttivo (il magnete solenoide) durante le fasi di commutazione. Tramite l'utilizzo dell'oscilloscopio è stato possibile osservare direttamente gli effetti della legge di Faraday-Lenz e la conseguente generazione di spike di sovratensione, che risultano essere potenzialmente distruttivi per i circuiti di pilotaggio a semiconduttore, come il transistor BJT impiegato nell'esperienza.
+
+Il successivo inserimento del diodo di freewheeling ha dimostrato in modo inequivocabile la sua efficacia e la sua vitale necessità: offrendo un percorso a bassa impedenza per il ricircolo della corrente, il diodo ha soppresso i pericolosi picchi di tensione inversa, garantendo la dissipazione sicura dell'energia magnetica immagazzinata nell'induttore senza recare danni al transistor. 
+
+Questa prova pratica ha permesso di consolidare i concetti teorici affrontati, evidenziando l'importanza critica di adottare sempre le adeguate protezioni circuitali durante la progettazione di sistemi di interfacciamento tra la logica di controllo e gli attuatori elettromeccanici impiegati in ambito industriale.
 \newpage
 
 \end{document}
-

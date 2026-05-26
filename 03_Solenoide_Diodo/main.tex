@@ -14,6 +14,7 @@
 \usepackage{hyperref}
 \usepackage[pages=some]{background}
 \usepackage[italian]{babel}
+\usepackage{circuitikz}
 \backgroundsetup{scale=1.5,anchor=right,angle=0,opacity=0.1,contents={\includegraphics[scale=1]{Misc/logo_standard (1).png}}}
 
 
@@ -120,12 +121,9 @@ Resistore&  Resistore & 1K$\Omega$ \\ \hline
 \section{Schema del circuito e procedura sperimentale}
 Il circuito realizzato permette di pilotare il solenoide attraverso un transistor BJT NPN. Il segnale di comando viene inviato alla base del transistor, il quale agisce come interruttore per far fluire corrente attraverso il carico induttivo. Successivamente, in parallelo al solenoide, viene inserito il diodo di freewheeling connesso in polarizzazione inversa rispetto all'alimentazione principale.
 
-\begin{figure}[H]
-    \centering
-    %\includegraphics[width=0.8\textwidth]{Misc/Schema_Collegamento.png}
-    \caption{INSERIRE INSERIRE Schema del collegamento dei componenti per il pilotaggio del solenoide.}
-    \label{fig:schema_collegamento}
-\end{figure}
+
+
+
 
 
 
@@ -137,7 +135,46 @@ Il circuito realizzato permette di pilotare il solenoide attraverso un transisto
         \caption{Foto del setup sperimentale con i componenti collegati su breadboard.}
         \label{fig:setup_sperimentale_no_diodo}
     \end{figure}
-    \newpage
+    Lo schema equivalente del circuito risulta:
+    \begin{figure}[H]
+    \centering
+    
+        \begin{circuitikz}[american, thick]
+            
+        
+            \node[npn] (Q) at (0,0) {};
+            \node[right=2pt] at (Q.C) {C};
+            \node[below right=2pt] at (Q.E) {E};
+            \node[below=2pt] at (Q.B) {B};
+
+            
+            \draw (Q.C) -- (0,1.5) coordinate (c_split);
+            \node[circ] at (c_split) {};
+
+        
+            \draw (c_split) to[L] (0,3.5) coordinate (c_join);
+            \node[circ] at (c_join) {};
+
+            
+            \draw (c_join) -- (3,3.5) to[V, l=+12V] (3,-1.5) coordinate (gnd_right);
+            
+            
+            \draw (Q.E) -- (0,-1.5) coordinate (gnd_mid);
+            \node[circ] at (gnd_mid) {};
+            \draw (gnd_right) -- (gnd_mid);
+
+            
+            \draw (Q.B) to[R, l=1k$\Omega$] (-3,0) coordinate (sig_in);
+            
+            
+            \draw (sig_in) to[sqV] (-3,-1.5) coordinate (gnd_left);
+            \draw (gnd_left) -- (gnd_mid);
+
+        \end{circuitikz}
+    \caption{Schema del collegamento dei componenti con diodo.}
+    \label{fig:schema_collegamento}
+\end{figure}
+   
 
     
     
@@ -150,6 +187,47 @@ Il circuito realizzato permette di pilotare il solenoide attraverso un transisto
         \caption{Foto del setup sperimentale con i componenti collegati su breadboard.}
         \label{fig:setup_sperimentale}
     \end{figure}
+
+    Lo schema equivalente aggiornato risulta:
+        \begin{figure}[H]
+    \centering
+    
+        \begin{circuitikz}[american, thick]
+            
+        
+            \node[npn] (Q) at (0,0) {};
+            \node[right=2pt] at (Q.C) {C};
+            \node[below right=2pt] at (Q.E) {E};
+            \node[below=2pt] at (Q.B) {B};
+
+            
+            \draw (Q.C) -- (0,1.5) coordinate (c_split);
+            \node[circ] at (c_split) {};
+
+        
+            \draw (c_split) to[L] (0,3.5) coordinate (c_join);
+            \node[circ] at (c_join) {};
+
+            \draw (c_split) -- (-1.5,1.5) to[D] (-1.5,3.5) -- (c_join);
+            
+            \draw (c_join) -- (3,3.5) to[V, l=+12V] (3,-1.5) coordinate (gnd_right);
+            
+            
+            \draw (Q.E) -- (0,-1.5) coordinate (gnd_mid);
+            \node[circ] at (gnd_mid) {};
+            \draw (gnd_right) -- (gnd_mid);
+
+            
+            \draw (Q.B) to[R, l=1k$\Omega$] (-3,0) coordinate (sig_in);
+            
+            
+            \draw (sig_in) to[sqV] (-3,-1.5) coordinate (gnd_left);
+            \draw (gnd_left) -- (gnd_mid);
+
+        \end{circuitikz}
+    \caption{Schema del collegamento dei componenti con diodo.}
+    \label{fig:schema_collegamento_diodo}
+\end{figure}
 
 \newpage
 

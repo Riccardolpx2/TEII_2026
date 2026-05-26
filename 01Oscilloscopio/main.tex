@@ -11,6 +11,7 @@
 \usepackage{tikz}
 \usepackage{enumitem}
 \usepackage{xcolor-solarized}
+\usepackage{amsmath}
 \usepackage[pages=some]{background}
 \usepackage[italian]{babel}
 \backgroundsetup{scale=1.5,anchor=right,angle=0,opacity=0.1,contents={\includegraphics[scale=1]{Misc/logo_standard (1).png}}}
@@ -26,8 +27,10 @@
 
 
 \title{
-    Relazione : Oscilloscopio \\ 
-    \vspace{0.3cm} 
+  \Large Relazione di laboratorio \\ 
+  \vspace{0.5cm} 
+   Oscilloscopio \\ 
+  \vspace{0.3cm}
     \Large Gruppo 100
 }
 \author{
@@ -69,7 +72,12 @@ L'attività pratica di laboratorio si suddivide in 3 fasi:
 \newpage
 
 \section{Introduzione e cenni teorici}
-Il setup sperimentale prevede il collegamento diretto tra il generatore di segnali integrato dello strumento e l'ingresso del canale 1 (CH1) dell'oscilloscopio.
+La calibrazione dell'oscilloscopio e, in particolare, la compensazione capacitiva della sonda, sono procedure fondamentali per garantire la fedeltà e l'accuratezza delle misure nel dominio del tempo e della frequenza.
+Una sonda passiva attenuata (ad esempio 10X) non essendo un conduttore ideale è paragonabile a un circuito RC. Poiché l'ingresso dell'oscilloscopio presenta una propria impedenza (tipicamente $1\text{M}\Omega$  in parallelo a una capacità parassita), 
+e il cavo della sonda introduce un'ulteriore capacità, l'intero sistema necessita di una compensazione capacitiva.
+
+Per evitare che il sistema distorca i segnali, attenuando o amplificando erroneamente le componenti ad alta frequenza, è necessario agire sul trimmer capacitivo istallato sul corpo della sonda stessa. 
+A livello teorico, la risposta in frequenza risulta piatta solo se la costante di tempo della sonda è perfettamente uguale a quella del circuito d'ingresso dell'oscilloscopio ($R_{sonda} \cdot C_{sonda} = R_{in} \cdot C_{in}$).
 
 \begin{figure}[H]
     \centering
@@ -79,13 +87,7 @@ Il setup sperimentale prevede il collegamento diretto tra il generatore di segna
 \end{figure}
 \newpage
 
-
 \section{Strumentazione e Componenti}
-Per lo svolgimento di questa esperienza di laboratorio non si sono resi necessari ulteriori componenti.
-
-\newpage
-
-\section{Schema del Circuito e Procedura Sperimentale}
 La strumentazione utilizzata durante l'esperienza è elencata nella tabella seguente:
 
 \begin{table}[H]
@@ -102,6 +104,23 @@ Software & OpenHantek & Software open source disponibile su macchine linux \\ \h
 \end{table}
 \newpage
 
+
+\section{ Schema del Circuito e Procedura Sperimentale}
+
+Il setup sperimentale per questa fase prevede il collegamento diretto tra il generatore del segnale di calibrazione integrato nello strumento e l'ingresso del canale 1 (CH1) dell'oscilloscopio tramite la sonda in esame.
+
+
+All'atto pratico, la compensazione si ottiene collegando la sonda al segnale di calibrazione dell'oscilloscopio (che fornisce un'onda quadra di riferimento nota) e regolando il condensatore variabile (trimmer) posto all'interno della sonda. L'obiettivo è ottenere a schermo un'onda quadra perfetta:
+\begin{itemize}
+    \item Se i fronti sono arrotondati, la sonda è \textbf{sottocompensata} (si comporta come un filtro passa-basso).
+    \item Se i fronti presentano un picco o sovraelongazione (overshoot), la sonda è \textbf{sovracompensata} (filtro passa-alto).
+\end{itemize}
+
+
+
+
+\newpage
+
 \section{Raccolta e Analisi dei Dati Sperimentali}
 
 \newpage
@@ -113,4 +132,3 @@ Software & OpenHantek & Software open source disponibile su macchine linux \\ \h
 \newpage
 
 \end{document}
-

@@ -1,4 +1,6 @@
 \documentclass{article}
+\usepackage[a4paper, margin=2.5cm]{geometry} % Margini professionali e ottimizzati
+\usepackage{parskip} % Spaziatura automatica tra i paragrafi e rimozione del rientro
 \usepackage[rightcaption]{sidecap}
 \usepackage{graphicx} % Required for inserting images
 \usepackage{multirow}
@@ -30,6 +32,8 @@
     pdftitle={Relazione tecnica Elettroattuatore e diodo di freewheeling - TEII},
 }
 
+% --- Miglioramento layout tabelle ---
+\renewcommand{\arraystretch}{1.3} % Aumenta lo spazio interno alle celle
 
 \title{
   \Large Relazione di laboratorio \\ 
@@ -62,11 +66,9 @@ nell'ambito del corso di Tecnologie Elettriche per l'informatica Industriale.\\
 In particolare, questa esperienza si è focalizzata sul funzionamento di un magnete solenoide pilotato da raspberry tramite transistor BJT
 e degli effetti induttivi generati dal suo funzionamento. 
 Inoltre, è stato analizzato il ruolo fondamentale del diodo di freewheeling (o di ricircolo) nella protezione dei componenti elettronici dalle sovratensioni generate dall'interruzione della corrente in un carico induttivo.
-
-
 \newpage
 
-\section{Introduzione e cenni teoritici}
+\section{Introduzione e cenni teorici}
 
 
 \begin{figure}[H]
@@ -106,6 +108,7 @@ I componenti utilizzati durante l'esperienza sono elencati nella tabella seguent
 Elettromagnete Solenoide & TAU-0730TM & 12V DC, $40\Omega$, 0.5N spinta,   \\ \hline
 Diodo & TO-220AB & 600V, 1A, General Purpose\\ \hline
 Transistor BJT & BDX33B& NPN Darlington, 80V, 10A \\ \hline
+Resistore&  Resistore & 1K$\Omega$ \\ \hline
 \end{tabularx}
 \caption{Componenti utilizzati.}
 \end{table}
@@ -115,7 +118,6 @@ Transistor BJT & BDX33B& NPN Darlington, 80V, 10A \\ \hline
     \includegraphics[width=0.9\textwidth]{Misc/attuatore.png}
     \caption{Elettromagnete solenoide TAU-0730TM.}
 \end{figure}
-\newpage
 \newpage
 
 \section{Raccolta e Analisi dei dati sperimentali}
@@ -144,7 +146,7 @@ Le osservazioni effettuate mostrano che:
 \begin{itemize}
     \item La tensione ai capi del transistor viene limitata a $V_{CC} + V_F$ (dove $V_F$ è la tensione di soglia del diodo).
     \item L'energia immagazzinata nel campo magnetico viene dissipata gradualmente attraverso la resistenza interna del solenoide e del diodo stesso.
-    \item Il tempo di rilascio meccanico dell'attuatore risulta leggermente superiore rispetto al caso senza diodo, a causa del prolungamento della circolazione di corrente.
+    \item Il tempo di rilascio meccanico dell'attuatore risulta leggermente superiore rispetto al caso senza diodo, a causa del prolungamento della circolazione di corrente determinato dalla costante di tempo $\tau = \frac{L}{R_{solenoide} + R_{diodo}}$.
 \end{itemize}
 
 \begin{figure}[H]

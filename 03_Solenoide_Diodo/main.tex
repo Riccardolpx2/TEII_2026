@@ -1,0 +1,97 @@
+\documentclass{article}
+\usepackage[rightcaption]{sidecap}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{multirow}
+\newcommand\tab[1][1cm]{\hspace*{#1}}
+\usepackage[T1]{fontenc}
+\usepackage{appendix}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage{eso-pic} % for \BgThispage
+\usepackage{tikz}
+\usepackage[pages=some]{background}
+\usepackage[italian]{babel}
+\backgroundsetup{scale=1.5,anchor=right,angle=0,opacity=0.1,contents={\includegraphics[scale=1]{Misc/logo_standard (1).png}}}
+
+
+% serve per inserire immagini
+%    \begin{figure}[H]
+%   \centering
+%    \includegraphics[width=0.5\textwidth]{Percorso File da inserire}
+%    \caption{Commento dell'immagine}
+%    \end{figure}
+
+
+
+\title{
+    Relazione : Filtri RC \\ 
+    \vspace{0.3cm} 
+    \Large Gruppo 100
+}
+\author{
+  Lorenzo Allocco \\ -- Mat. 061270XXXX
+  \and
+  Riccardo La Porta \\ -- Mat. 0612709691
+}
+\date{5 Marzo 2026}
+\begin{document}
+\AddToShipoutPictureBG*{%
+  \begin{tikzpicture}[remember picture, overlay]
+    \node [anchor=north west, inner sep=30pt] at (current page.north west)
+      {\includegraphics[height=1.5cm]{Misc/diem (1).png}};
+  \end{tikzpicture}
+}
+\BgThispage
+\maketitle
+\newpage
+\tableofcontents
+\newpage
+\section{Obiettivi della prova}
+La seguente relazione si pone come obiettivo quello di descrivere l'esperienza di laboratorio tenutasi
+nell'ambito del corso di Tecnologie Elettriche per l'informatica Industriale.\\
+Lo scopo è quello 
+\newpage
+
+\section{Schemi}
+
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.6\textwidth]{Schema_Collegamento}
+    \small (In questa sezione andrebbe inserito lo schema circuitale o una foto del setup)
+    \caption{Schema del collegamento tra generatore e oscilloscopio.}
+\end{figure}
+\newpage
+
+
+\section{Elenco dei componenti}
+
+\newpage
+
+\section{Strumenti utilizzati}
+La strumentazione utilizzata durante l'esperienza è elencata nella tabella seguente:
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{|X|X|X|}
+\hline
+\textbf{Strumento} & \textbf{Modello} & \textbf{Caratteristiche} \\ \hline
+Oscilloscopio Digitale & Hantek 6022BL & 2 canali, 20 MHz, 48 MS/s \\ \hline
+Software & DPO & Software per macchine Windows \\ \hline
+Software & OpenHantek & Software open source disponibile su macchine linux \\ \hline
+\end{tabularx}
+\caption{Specifiche della strumentazione di laboratorio.}
+\end{table}
+\newpage
+
+\section{Descrizione delle misure effettuate}
+\newpage
+
+\section{Risultati}
+\newpage
+
+\section{Conclusioni}
+\newpage
+
+\end{document}
+

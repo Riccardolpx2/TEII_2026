@@ -79,12 +79,6 @@ e il cavo della sonda introduce un'ulteriore capacità, l'intero sistema necessi
 Per evitare che il sistema distorca i segnali, attenuando o amplificando erroneamente le componenti ad alta frequenza, è necessario agire sul trimmer capacitivo istallato sul corpo della sonda stessa. 
 A livello teorico, la risposta in frequenza risulta piatta solo se la costante di tempo della sonda è perfettamente uguale a quella del circuito d'ingresso dell'oscilloscopio ($R_{sonda} \cdot C_{sonda} = R_{in} \cdot C_{in}$).
 
-\begin{figure}[H]
-    \centering
-     
-    \small (In questa sezione andrebbe inserito lo schema circuitale o una foto del setup)
-    \caption{Schema del collegamento tra generatore e oscilloscopio.}
-\end{figure}
 \newpage
 
 \section{Strumentazione e Componenti}
@@ -107,7 +101,8 @@ Software & OpenHantek & Software open source disponibile su macchine linux \\ \h
 
 \section{ Schema del Circuito e Procedura Sperimentale}
 
-Il setup sperimentale per questa fase prevede il collegamento diretto tra il generatore del segnale di calibrazione integrato nello strumento e l'ingresso del canale 1 (CH1) dell'oscilloscopio tramite la sonda in esame.
+Il setup sperimentale per questa fase prevede il collegamento diretto tra il generatore del segnale di calibrazione integrato nello strumento e l'ingresso del canale 1 (CH1) dell'oscilloscopio tramite la sonda impostata a X10.
+
 
 
 All'atto pratico, la compensazione si ottiene collegando la sonda al segnale di calibrazione dell'oscilloscopio (che fornisce un'onda quadra di riferimento nota) e regolando il condensatore variabile (trimmer) posto all'interno della sonda. L'obiettivo è ottenere a schermo un'onda quadra perfetta:

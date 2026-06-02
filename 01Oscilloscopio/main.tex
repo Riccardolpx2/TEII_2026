@@ -34,7 +34,7 @@
     \Large Gruppo 100
 }
 \author{
-  Lorenzo Allocco \\ -- Mat. 061270XXXX
+  Lorenzo Allocco \\ -- Mat. 0612709084
   \and
   Riccardo La Porta \\ -- Mat. 0612709691
   \and 
@@ -57,14 +57,15 @@
 \newpage
 \section{Obiettivi dell'esperienza}
 La seguente relazione si pone come obiettivo quello di descrivere l'esperienza di laboratorio tenutasi
-nell'ambito del corso di Tecnologie Elettriche per l'informatica Industriale.\\
-Lo scopo è quello di introdurre lo studente all'utilizzo e alla comprensione dell'Oscilloscopio come strumento di misura, nonchè
+nell'ambito del corso di Tecnologie Elettriche per l'Informatica Industriale.\\
+Lo scopo è quello di introdurre lo studente all'utilizzo e alla comprensione dell'Oscilloscopio (Hantek 6022BL) come strumento di misura, nonchè
 comprendere la sua applicazione nello studio e nell'analisi di segnali elettrici.
 \\
 \\
-L'attività pratica di laboratorio si suddivide in 3 fasi:
+L'attività pratica di laboratorio si suddivide in 4 fasi:
 \
 \begin{itemize}
+    \item Configurazione dello strumento
     \item Misura del segnale di calibrazione
     \item Calibrazione dello strumento
     \item Compensazione capacitiva della sonda
@@ -72,12 +73,17 @@ L'attività pratica di laboratorio si suddivide in 3 fasi:
 \newpage
 
 \section{Introduzione e cenni teorici}
-La calibrazione dell'oscilloscopio e, in particolare, la compensazione capacitiva della sonda, sono procedure fondamentali per garantire la fedeltà e l'accuratezza delle misure nel dominio del tempo e della frequenza.
-Una sonda passiva attenuata (ad esempio 10X) non essendo un conduttore ideale è paragonabile a un circuito RC. Poiché l'ingresso dell'oscilloscopio presenta una propria impedenza (tipicamente $1\text{M}\Omega$  in parallelo a una capacità parassita), 
-e il cavo della sonda introduce un'ulteriore capacità, l'intero sistema necessita di una compensazione capacitiva.
+La calibrazione dell'oscilloscopio, e in particolare la compensazione capacitiva della sonda, sono procedure fondamentali per garantire la fedeltà e l'accuratezza delle misure nel dominio del tempo e della frequenza.
+Una sonda passiva attenuata (tipicamente di tipo 10X) non si comporta come un conduttore ideale: il suo modello equivalente è un partitore resistivo-capacitivo, composto dalla resistenza e dalla capacità della sonda stessa in serie, che si interfaccia con l'impedenza d'ingresso dell'oscilloscopio (tipicamente $1\text{M}\Omega$  in parallelo a una capacità parassita). Il cavo coassiale della sonda introduce a sua volta una capacità distribuita che si somma a quella parassita dell'ingresso.
+Per garantire una risposta in frequenza piatta è necessario che le costanti di tempo dei due rami del partitore siano uguali:
 
-Per evitare che il sistema distorca i segnali, attenuando o amplificando erroneamente le componenti ad alta frequenza, è necessario agire sul trimmer capacitivo istallato sul corpo della sonda stessa. 
-A livello teorico, la risposta in frequenza risulta piatta solo se la costante di tempo della sonda è perfettamente uguale a quella del circuito d'ingresso dell'oscilloscopio ($R_{sonda} \cdot C_{sonda} = R_{in} \cdot C_{in}$).
+
+\begin{equation*}
+R_{sonda} \cdot C_{sonda} = R_{in} \cdot C_{in}
+\end{equation*}
+
+Se questa condizione non è soddisfatta, il sistema si comporta come un filtro: le componenti ad alta frequenza vengono attenuate (sonda sottocompensata) oppure amplificate (sonda sovracompensata), introducendo distorsione nella forma d'onda visualizzata.
+La compensazione si realizza agendo su un condensatore variabile (trimmer capacitivo) integrato nel corpo della sonda. Il segnale di riferimento utilizzato per questa operazione è un'onda quadra a frequenza nota generata internamente dall'oscilloscopio: poiché un'onda quadra contiene ricche componenti armoniche ad alta frequenza, eventuali errori di compensazione si manifestano chiaramente come deformazioni sui fronti di salita e di discesa.
 
 \begin{figure}[H]
     \centering
@@ -107,28 +113,64 @@ Software & OpenHantek & Software open source disponibile su macchine linux \\ \h
 
 \section{ Schema del Circuito e Procedura Sperimentale}
 
+\subsection{Compensazione della sonda}
+
 Il setup sperimentale per questa fase prevede il collegamento diretto tra il generatore del segnale di calibrazione integrato nello strumento e l'ingresso del canale 1 (CH1) dell'oscilloscopio tramite la sonda in esame.
 
-
-All'atto pratico, la compensazione si ottiene collegando la sonda al segnale di calibrazione dell'oscilloscopio (che fornisce un'onda quadra di riferimento nota) e regolando il condensatore variabile (trimmer) posto all'interno della sonda. L'obiettivo è ottenere a schermo un'onda quadra perfetta:
-\begin{itemize}
-    \item Se i fronti sono arrotondati, la sonda è \textbf{sottocompensata} (si comporta come un filtro passa-basso).
-    \item Se i fronti presentano un picco o sovraelongazione (overshoot), la sonda è \textbf{sovracompensata} (filtro passa-alto).
-\end{itemize}
+La procedura si svolge nei seguenti passi:
 
 
+    \textbf{Configurazione iniziale dello strumento}: avviare il software, verificare la corretta rilevazione dello strumento e impostare la scala temporale a 1 ms/div e quella verticale a 2 V/div. La situazione iniziale, con sonda non ottimizzata, è riportata in Figura 2.
 
+    \textbf{Collegamento della sonda al segnale di calibrazione}: agganciare la punta della sonda al connettore di calibrazione dell'oscilloscopio.
+
+     \textbf{Osservazione e regolazione}: analizzare la forma d'onda e agire sul trimmer capacitivo della sonda. Tre condizioni sono possibili:
+    \begin{itemize}
+        \item fronti verticali e livelli stabili: sonda correttamente compensata;
+        \item fronti arrotondati: sonda sottocompensata, aumentare il valore del trimmer;
+        \item picchi di overshoot sui fronti: sonda sovracompensata, ridurre il valore del trimmer.
+    \end{itemize}
+
+     \textbf{Verifica finale}: una volta raggiunta la compensazione ottimale, i due canali mostrano parametri coerenti tra loro. Come si osserva in Figura 3 , entrambi i canali presentano
+    $f = 2.000\,\mathrm{kHz}$,
+$V_{pp} \approx 3.5\,\mathrm{V}$
+    $T = 500\,\mu\mathrm{s}$,
+    confermando la corretta calibrazione della sonda.
 
 \newpage
 
 \section{Raccolta e Analisi dei Dati Sperimentali}
+Le acquisizioni effettuate durante la sessione di laboratorio documentano l'evoluzione della misura nelle diverse fasi della procedura. 
 
+    \begin{figure}[H]
+   \centering
+    \includegraphics[width=0.5\textwidth]{immagini/Figura1.png}
+    \caption{ Configurazione iniziale: CH1 con segnale a bassa ampiezza (Vpp = 188 mV, RiseT = 104 µs). Scala 1 ms/div, trigger su CH2.}
+    \end{figure}
+
+    \begin{figure}[H]
+   \centering
+    \includegraphics[width=0.5\textwidth]{immagini/Figura4.png}
+    \caption{ ( Stato finale dopo calibrazione: entrambi i canali a f = 2.000 kHz, $V_{pp} \approx 3.5\,\mathrm{V}$, T = 500 µs, duty cycle 24.8\%, Scala 500 µs/div.)}
+    \end{figure}
+    
+     
 \newpage
 
 \section{Discussione dei Risultati}
+I risultati ottenuti sono in accordo con quanto previsto dalla teoria. La compensazione capacitiva della sonda ha un impatto diretto sulla fedeltà della misura: una sonda non correttamente compensata introduce un errore sistematico che dipende dalla frequenza del segnale, rendendo inaffidabili le misure su segnali con componenti ad alta frequenza.
+In particolare, la condizione di sottocompensazione è critica in tutte le applicazioni in cui è necessario misurare con precisione i tempi di salita e di discesa di un segnale digitale o impulsivo. Una lettura distorta del fronte potrebbe portare a una sovrastima del tempo di salita reale, con conseguenti errori nella caratterizzazione di circuiti digitali o nella misura della banda del segnale.
+La condizione di sovracompensazione, seppur meno comune in pratica, può indurre a ritenere presente un overshoot nel segnale anche quando questo non esiste nel circuito reale, con possibili errori di interpretazione nella valutazione della stabilità di un sistema.
+
+I dati rilevati mostrano che nella fase finale (Figura 3) i due canali presentano valori molto vicini tra loro (differenza di Vpp < 2\%), confermando la riuscita della procedura di calibrazione e la coerenza delle misure tra i canali dello strumento.
+
 \newpage
 
 \section{Conclusioni}
+L'esperienza di laboratorio ha permesso di acquisire familiarità con l'oscilloscopio digitale Hantek 6022BL e con le procedure di base necessarie per un corretto utilizzo dello strumento.
+La compensazione capacitiva della sonda, pur essendo un'operazione semplice e rapida, si è rivelata fondamentale per garantire l'affidabilità delle misure. Essa rappresenta un prerequisito necessario prima di qualsiasi sessione di misura, specialmente quando si lavora con segnali ad alta frequenza o con forme d'onda impulsive.
+I concetti appresi costituiscono una base teorica e pratica utile per tutte le successive esperienze di laboratorio del corso di Tecnologie Elettriche per l'Informatica Industriale.
+
 \newpage
 
 \end{document}

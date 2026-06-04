@@ -241,143 +241,145 @@
 
 La strumentazione utilizzata durante l'esperienza è elencata nella tabella seguente:
 
-\begin{table}[H]
-\centering
-\begin{tabularx}{\textwidth}{|X|X|X|}
-\hline
-\textbf{Strumento} & \textbf{Modello} & \textbf{Caratteristiche} \\ \hline
-Oscilloscopio Digitale & Hantek 6022BL & 2 canali, 20 MHz, 48 MS/s \\ \hline
-Software & DPO & Software per macchine Windows \\ \hline
-Software & OpenHantek & Software open source disponibile su macchine linux \\ \hline
-Microcontrollore & Raspberry Pi 3 & Clock: 1.2 GHz, 4 porte USB \\ \hline
-BreadBoard & 165x55x10 & 830 fori, 69gr \\ \hline
-\end{tabularx}
-\captionsetup{justification=centering, singlelinecheck=false, font=small}
-\caption{Specifiche della strumentazione di laboratorio.}
-\end{table}
+  \begin{table}[H]
+    \centering
+
+    \begin{tabularx}{\textwidth}{|X|X|X|}
+      \hline
+      \textbf{Strumento} & \textbf{Modello} & \textbf{Caratteristiche} \\ \hline
+      Oscilloscopio Digitale & Hantek 6022BL & 2 canali, 20 MHz, 48 MS/s \\ \hline
+      Software & DPO & Software per macchine Windows \\ \hline
+      Software & OpenHantek & Software open source disponibile su macchine linux \\ \hline
+      Microcontrollore & Raspberry Pi 3 & Clock: 1.2 GHz, 4 porte USB \\ \hline
+      BreadBoard & 165x55x10 & 830 fori, 69gr \\ \hline
+    \end{tabularx}
+
+    \captionsetup{justification=centering, singlelinecheck=false, font=small}
+    \caption{Specifiche della strumentazione di laboratorio.}
+  \end{table}
 
 \newpage
 
 \section{FILTRO PASSA-BASSO}
 
 \subsection{Descrizione delle misure effettuate}
-        In questo esperimento, l’obiettivo è realizzare un filtro passa-basso composto da
-        un resistore e un condensatore. Avendo a disposizione diverse tipologie di questi
-        componenti, abbiamo scelto quest'ultimi sulla base di alcune osservazioni:
-        \begin{itemize}
-          \item Analizziamo la configurazione circuitale in \textit{Figura 1} e consideriamo il diagramma a blocchi e il \textit{Diagramma di Bode}
-                del sistema schematizzati come:
-                % Disegno del blocco
-                \begin{figure}[H]
-                  \centering
-                  \begin{tikzpicture}[
-                      % Definiamo lo stile del blocco centrale per non doverlo ripetere
-                      blocco/.style={
-                          draw, 
-                          rectangle, 
-                          minimum width=2cm, 
-                          minimum height=1.5cm, 
-                          line width=1.5pt,
-                          align=center
-                      },
-                      % Stile per le frecce con la punta marcata
-                      freccia/.style={
-                          ->, 
-                          >={Stealth[length=3mm]}, 
-                          line width=1.5pt
-                      }
-                  ]
-                      
-                      % 1. Posizioniamo il blocco centrale con la formula matematica
-                      \node [blocco] (sistema) at (0,0) {\Large $\frac{1}{R_{L}C_{L}s + 1}$};
-                      
-                      % 2. Freccia di ingresso (Vin)
-                      % Partiamo da sinistra rispetto al blocco (-3,0) e andiamo verso il bordo sinistro del blocco
-                      \draw [freccia] (-2.5,0) -- (sistema.west);
-                      % Etichetta Vin rossa sopra la freccia
-                      \node [text=red, font=\bfseries\Large] at (-1.8,0.5) {$V_{in}$};
-                      
-                      % 3. Freccia di uscita (Vout)
-                      % Partiamo dal bordo destro del blocco e andiamo verso destra (+2.5,0)
-                      \draw [freccia] (sistema.east) -- (2.5,0);
-                      % Etichetta Vout rossa sopra la freccia
-                      \node [text=red, font=\bfseries\Large] at (1.8,0.5) {$V_{out}$};
-                      
-                  \end{tikzpicture}
-                  \captionsetup{justification=centering, singlelinecheck=false, font=small}
-                  \caption{Rappresentazione a blocchi della funzione di trasferimento del filtro \textit{Passa-Basso}.}
-                  \label{fig:blocco_rc}
-                \end{figure}
+  In questo esperimento, l’obiettivo è realizzare un filtro passa-basso composto da
+  un resistore e un condensatore. Avendo a disposizione diverse tipologie di questi
+  componenti, abbiamo scelto quest'ultimi sulla base di alcune osservazioni:
+  \begin{itemize}
+    \item Analizziamo la configurazione circuitale in \textit{Figura 1} e consideriamo il diagramma a blocchi e il \textit{Diagramma di Bode}
+          del sistema schematizzati come:
+          % Disegno del blocco
+          \begin{figure}[H]
+            \centering
+            \begin{tikzpicture}[
+                % Definiamo lo stile del blocco centrale per non doverlo ripetere
+                blocco/.style={
+                    draw, 
+                    rectangle, 
+                    minimum width=2cm, 
+                    minimum height=1.5cm, 
+                    line width=1.5pt,
+                    align=center
+                },
+                % Stile per le frecce con la punta marcata
+                freccia/.style={
+                    ->, 
+                    >={Stealth[length=3mm]}, 
+                    line width=1.5pt
+                }
+            ]
                 
-                % Diagramma di Bode
-                \begin{figure}[H]
-                  \centering
-                  \begin{tikzpicture}
-                      \begin{axis}[
-                          width=11cm, height=6.5cm,   % Leggermente più alto visto che è singolo
-                          xmode=log,                  % Asse X logaritmico
-                          xmin=1, xmax=10000,         % Range frequenze da 1 Hz a 10 kHz
-                          xlabel={Frequenza [Hz]},
-                          ylabel={Magnitudo [dB]},
-                          ymin=-40, ymax=5,
-                          ytick={-30, -20, -10, -3, 0}, % Tick a -3 dB per la frequenza di taglio
-                          grid=both,
-                          minor grid style={dashed, gray!30},
-                          major grid style={gray!60},
-                          tick label style={font=\footnotesize},
-                          label style={font=\small}
-                      ]
-                      
-                      % Funzione analitica del solo filtro passa-basso: 1 / sqrt(1 + (2*pi*x*tau)^2)
-                      \addplot[red, thick, domain=1:10000, samples=200] 
-                          {20*log10( 1 / sqrt(1 + (2*pi*x*0.001)^2) )};
-                          
-                      \end{axis}
-                  \end{tikzpicture}
-                  
-                  % PROPRIETÀ INLINE: Applica la formattazione solo a questa caption
-                  \captionsetup{justification=centering, singlelinecheck=false, font=small}
-                  \caption{Diagramma di Bode (Modulo) del filtro passa-basso}
-                  \label{fig:bode_passabasso_modulo}
-                \end{figure}
+                % 1. Posizioniamo il blocco centrale con la formula matematica
+                \node [blocco] (sistema) at (0,0) {\Large $\frac{1}{R_{L}C_{L}s + 1}$};
+                
+                % 2. Freccia di ingresso (Vin)
+                % Partiamo da sinistra rispetto al blocco (-3,0) e andiamo verso il bordo sinistro del blocco
+                \draw [freccia] (-2.5,0) -- (sistema.west);
+                % Etichetta Vin rossa sopra la freccia
+                \node [text=red, font=\bfseries\Large] at (-1.8,0.5) {$V_{in}$};
+                
+                % 3. Freccia di uscita (Vout)
+                % Partiamo dal bordo destro del blocco e andiamo verso destra (+2.5,0)
+                \draw [freccia] (sistema.east) -- (2.5,0);
+                % Etichetta Vout rossa sopra la freccia
+                \node [text=red, font=\bfseries\Large] at (1.8,0.5) {$V_{out}$};
+                
+            \end{tikzpicture}
+            \captionsetup{justification=centering, singlelinecheck=false, font=small}
+            \caption{Rappresentazione a blocchi della funzione di trasferimento del filtro \textit{Passa-Basso}.}
+            \label{fig:blocco_rc}
+          \end{figure}
+          
+          % Diagramma di Bode
+          \begin{figure}[H]
+            \centering
+            \begin{tikzpicture}
+                \begin{axis}[
+                    width=11cm, height=6.5cm,   % Leggermente più alto visto che è singolo
+                    xmode=log,                  % Asse X logaritmico
+                    xmin=1, xmax=10000,         % Range frequenze da 1 Hz a 10 kHz
+                    xlabel={Frequenza [Hz]},
+                    ylabel={Magnitudo [dB]},
+                    ymin=-40, ymax=5,
+                    ytick={-30, -20, -10, -3, 0}, % Tick a -3 dB per la frequenza di taglio
+                    grid=both,
+                    minor grid style={dashed, gray!30},
+                    major grid style={gray!60},
+                    tick label style={font=\footnotesize},
+                    label style={font=\small}
+                ]
+                
+                % Funzione analitica del solo filtro passa-basso: 1 / sqrt(1 + (2*pi*x*tau)^2)
+                \addplot[red, thick, domain=1:10000, samples=200] 
+                    {20*log10( 1 / sqrt(1 + (2*pi*x*0.001)^2) )};
+                    
+                \end{axis}
+            \end{tikzpicture}
+            
+            % PROPRIETÀ INLINE: Applica la formattazione solo a questa caption
+            \captionsetup{justification=centering, singlelinecheck=false, font=small}
+            \caption{Diagramma di Bode (Modulo) del filtro passa-basso}
+            \label{fig:bode_passabasso_modulo}
+          \end{figure}
 
-                Possiamo notare come questo sistema così configurato agisca come previsto,
-                visto che reagisce alle basse frequenze (fino ad arrivare alla \textit{Frequenza di Taglio})
-                con un guadagno unitario, mentre reagisce alle alte frequenze con un guadagno sempre più
-                piccolo all'aumentare della frequenza con una variazione di -20 dB/dec. 
-          \newpage
+          Possiamo notare come questo sistema così configurato agisca come previsto,
+          visto che reagisce alle basse frequenze (fino ad arrivare alla \textit{Frequenza di Taglio})
+          con un guadagno unitario, mentre reagisce alle alte frequenze con un guadagno sempre più
+          piccolo all'aumentare della frequenza con una variazione di -20 dB/dec. 
+    \newpage
 
-          \item Dalla teoria dei sistemi, è facile convincersi che per migliorare le prestazioni di
-                filtri di questo tipo bisogna aumentare la velocità con cui il guadagno si abbassa per
-                le frequenze oltre quella di taglio ($f_{T}$). Inoltre è facile ricavare una formula per
-                calcolare $f_{T}$ visto che guardando la funzione di trasferimento osserviamo che la 
-                \textit{pulsazione di rottura} ($\omega_{r}$) vale esattamente
-                \boldmath{$\omega_{r}$ = $\frac{1}{R_{L}C_{L}}$}, quindi di conseguenza: \\
-                \begin{equation}
-                  \boxed{f_{T} = \frac{1}{2\pi R_{L}C_{L}}}
-                \end{equation}
+    \item Dalla teoria dei sistemi, è facile convincersi che per migliorare le prestazioni di
+          filtri di questo tipo bisogna aumentare la velocità con cui il guadagno si abbassa per
+          le frequenze oltre quella di taglio ($f_{T}$). Inoltre è facile ricavare una formula per
+          calcolare $f_{T}$ visto che guardando la funzione di trasferimento osserviamo che la 
+          \textit{pulsazione di rottura} ($\omega_{r}$) vale esattamente
+          \boldmath{$\omega_{r}$ = $\frac{1}{R_{L}C_{L}}$}, quindi di conseguenza: \\
+          \begin{equation}
+            \boxed{f_{T} = \frac{1}{2\pi R_{L}C_{L}}}
+          \end{equation}
 
-          \item Per arrivare a scegliere accuratamente la resistenza e il condensatore adatti al circuito
-                dobbiamo anche osservare che, data la configurazione del circuito in \textit{Figura 1}, la scelta
-                del dimensionamento della resistenza può incidere sulla riuscita finale dell'esperimento visto che
-                scegliendo un valore troppo basso quest'ultima tenderà al comportamento di un cortocircuito
-                mentre scegliendo un valore troppo alto quest'ultima tenderà al comportamento di un'aperto. Il
-                valore scelto in fase di progettazione è stato $R_{L}$ = 10k$\Omega$ essendo un giusto compromesso tra
-                i due casi descritti in precedenza, evitando così di ridurre significativamente la sensibilità del
-                circuito o magari, in alcuni casi, di danneggiarlo.
+    \item Per arrivare a scegliere accuratamente la resistenza e il condensatore adatti al circuito
+          dobbiamo anche osservare che, data la configurazione del circuito in \textit{Figura 1}, la scelta
+          del dimensionamento della resistenza può incidere sulla riuscita finale dell'esperimento visto che
+          scegliendo un valore troppo basso quest'ultima tenderà al comportamento di un cortocircuito
+          mentre scegliendo un valore troppo alto quest'ultima tenderà al comportamento di un'aperto. Il
+          valore scelto in fase di progettazione è stato $R_{L}$ = 10k$\Omega$ essendo un giusto compromesso tra
+          i due casi descritti in precedenza, evitando così di ridurre significativamente la sensibilità del
+          circuito o magari, in alcuni casi, di danneggiarlo.
 
-          \item Ora sulla base del dimensionamento effettuato al punto precedente, possiamo scegliere il valore della
-                capacità del condensatore usando la formula ricavata dall'analisi del diagramma di Bode. La capacità
-                selezionata in fase progettuale tra i componenti a disposizione è stata $C_{L}$ = 0.1$\mu$F. 
+    \item Ora sulla base del dimensionamento effettuato al punto precedente, possiamo scegliere il valore della
+          capacità del condensatore usando la formula ricavata dall'analisi del diagramma di Bode. La capacità
+          selezionata in fase progettuale tra i componenti a disposizione è stata $C_{L}$ = 0.1$\mu$F. 
 
-          \item Successivamente abbiamo proceduto alla misurazione effettiva dei paramentri reali dei componenti
-                riscontrando il corretto funzionamento di questi, visto il discostamento irrilevante dei valori misurati
-                da quelli nominali. Si è scelto quindi di trascurare le differenze tra i valori nominali e quelli misurati
-                procedendo così a calcolare la $f_{T}$ come:
-                \begin{equation}
-                  \boxed{f_{T} = \frac{1}{2\pi R_{L}C_{L}} = \frac{1}{2\pi \cdot 10^4 \cdot 10^{-7}} \approx 159.15 \text{ Hz} \approx 160 \text{ Hz}}
-                \end{equation}
-        \end{itemize}
+    \item Successivamente abbiamo proceduto alla misurazione effettiva dei paramentri reali dei componenti
+          riscontrando il corretto funzionamento di questi, visto il discostamento irrilevante dei valori misurati
+          da quelli nominali. Si è scelto quindi di trascurare le differenze tra i valori nominali e quelli misurati
+          procedendo così a calcolare la $f_{T}$ come:
+          \begin{equation}
+            \boxed{f_{T} = \frac{1}{2\pi R_{L}C_{L}} = \frac{1}{2\pi \cdot 10^4 \cdot 10^{-7}} \approx 159.15 \text{ Hz} \approx 160 \text{ Hz}}
+          \end{equation}
+  \end{itemize}
 \newpage
 
 \subsection{Risultati}

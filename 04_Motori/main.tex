@@ -1,32 +1,27 @@
 \documentclass{article}
 \usepackage[rightcaption]{sidecap}
-\usepackage{graphicx} % Required for inserting images
+\usepackage{graphicx} 
 \usepackage{multirow}
 \newcommand\tab[1][1cm]{\hspace*{#1}}
 \usepackage[T1]{fontenc}
 \usepackage{appendix}
 \usepackage{tabularx}
 \usepackage{float}
-\usepackage{eso-pic} % for \BgThispage
+\usepackage{eso-pic} 
 \usepackage{tikz}
 \usepackage{enumitem}
 \usepackage{xcolor-solarized}
 \usepackage[pages=some]{background}
 \usepackage[italian]{babel}
+\usepackage{amsmath} % Fornisce il supporto nativo a \text{} e agli ambienti matematici avanzati
+
 \backgroundsetup{scale=1.5,anchor=right,angle=0,opacity=0.1,contents={\includegraphics[scale=1]{Misc/logo_standard (1).png}}}
 
-
-% serve per inserire immagini
-%    \begin{figure}[H]
-%   \centering
-%    \includegraphics[width=0.5\textwidth]{Percorso File da inserire}
-%    \caption{Commento dell'immagine}
-%    \end{figure}
-
-
+\newcommand{\laplace}{\(F = I (L \cdot B)\)}
+\newcommand{\lorentz}{\(F = q(v \cdot B)\)}
 
 \title{
-    Relazione : Caratterizzazione di un Motore in Corrente Continua e Controllo di un Motore Passo-Passo \\ 
+    Relazione: Caratterizzazione e Controllo di Motori Elettrici tramite Raspberry Pi e Adafruit Motor HAT \\ 
     \vspace{0.3cm} 
     \Large Gruppo 100
 }
@@ -40,7 +35,9 @@
   Alessandro Altieri \\ -- Mat.0612709239
 }
 \date{5 Marzo 2026}
+
 \begin{document}
+
 \AddToShipoutPictureBG*{%
   \begin{tikzpicture}[remember picture, overlay]
     \node [anchor=north west, inner sep=30pt] at (current page.north west)
@@ -52,63 +49,154 @@
 \newpage
 \tableofcontents
 \newpage
+
 \section{Obiettivi dell'esperienza}
-La seguente relazione si pone come obiettivo quello di descrivere l'esperienza di laboratorio tenutasi
-nell'ambito del corso di Tecnologie Elettriche per l'informatica Industriale.\\
-Lo scopo è quello di introdurre lo studente all'utilizzo e alla comprensione dell'Oscilloscopio come strumento di misura, nonchè
-comprendere la sua applicazione nello studio e nell'analisi di segnali elettrici.
-\\
-\\
-L'attività pratica di laboratorio si suddivide in 3 fasi:
-\
+La presente relazione ha l'obiettivo di analizzare e descrivere il principio di funzionamento e le modalità di controllo digitale di due differenti tipologie di attuatori elettrici: un motore in corrente continua (DC) a magneti permanenti e un motore passo-passo (Stepper) bipolare. Nello specifico, l'esperienza si è focalizzata sull'impiego di un sistema embedded basato su piattaforma \textbf{Raspberry Pi} accoppiato alla scheda di espansione \textbf{Adafruit DC and Stepper Motor HAT}, approfondendo i seguenti aspetti operativi:
 \begin{itemize}
-    \item Motore DC: Rilevare la caratteristica tensione-velocità a vuoto di un motore a magneti permanenti e analizzare il controllo della velocità tramite modulazione a larghezza di impulso (PWM);
-    \item Motore Stepper: Analizzare le sequenze di commutazione delle fasi (Full-Step e Half-Step) per il controllo di posizione e verificare la precisione del passo angolare.
+\item \textbf{Motore DC:} determinazione sperimentale della caratteristica tensione-velocità a vuoto mediante la modulazione del parametro di \textit{throttle} software e analisi della linearità del sistema.
+\item \textbf{Motore Stepper:} studio delle sequenze di commutazione e implementazione delle logiche di stepping (Single, Double, Interleaved e Microstepping) per la verifica della precisione dell'angolo di passo e della fluidità dinamica del movimento.
 \end{itemize}
 \newpage
 
 \section{Introduzione e cenni teorici}
-Il setup sperimentale prevede il collegamento diretto tra il generatore di segnali integrato dello strumento e l'ingresso del canale 1 (CH1) dell'oscilloscopio.
+Il motore a corrente continua (DC) converte l'energia elettrica in ingresso in energia meccanica rotazionale basandosi sulla legge della forza di Laplace:
+\begin{center}
+\laplace
+\end{center}
 
-\begin{figure}[H]
-    \centering
-    % \includegraphics[width=0.6\textwidth]{Schema_Collegamento}
-    \small (In questa sezione andrebbe inserito lo schema circuitale o una foto del setup)
-    \caption{Schema del collegamento tra generatore e oscilloscopio.}
-\end{figure}
+All'equilibrio elettrico di regime, la tensione d'armatura $V_a$ applicata ai morsetti è bilanciata dalla caduta sulla resistenza interna e dalla forza contro-elettromotrice $E$ indotta dal movimento del rotore:
+$$V_a = R_a I_a + E$$
+Dato che $E = K_e \cdot \omega$ (dove $K_e$ è la costante di forza contro-elettromotrice e $\omega$ la velocità angolare), in condizioni di funzionamento a vuoto la corrente $I_a$ assorbita assume valori minimi trascurabili, rendendo la velocità di rotazione direttamente proporzionale alla tensione applicata: $V_a \approx K_e \cdot \omega$.
+
+\subsection{Il Ponte ad H (H-Bridge)}
+Per invertire il verso di rotazione di un motore in corrente continua è necessario invertire la polarità della tensione ai suoi capi. Il circuito classico utilizzato a questo scopo è il \textbf{ponte ad H}, così chiamato per la disposizione dei componenti che ricorda la lettera "H". 
+
+Il circuito è costituito da quattro interruttori elettronici disposti in coppia su due rami verticali, con il motore posizionato sul ramo centrale trasversale. Nell'hardware Adafruit impiegato, tali interruttori sono costituiti da MOSFET di potenza integrati nel chipset \textbf{TB6612}. Il funzionamento si articola in quattro stati logici fondamentali:
+\begin{enumerate}
+\item \textbf{Marcia Avanti:} Chiudendo l'interruttore in alto a sinistra (S1) e quello in basso a destra (S4), la corrente attraversa il motore da sinistra a destra.
+\item \textbf{Marcia Indietro:} Chiudendo l'interruttore in alto a destra (S2) e quello in basso a sinistra (S3), la polarità si inverte e la corrente scorre da destra a sinistra.
+\item \textbf{Frenatura Dinamica (Brake):} Chiudendo simultaneamente i due interruttori inferiori (S3 e S4) o i due superiori (S1 e S2), i morsetti del motore vengono cortocircuitati tra loro. L'energia cinetica residua viene dissipata sotto forma di corrente elettrica sul corto, arrestando bruscamente l'albero.
+\item \textbf{Rilascio (Coast):} Aprendo tutti e quattro gli interruttori, il motore viene isolato elettricamente dalla sorgente e continua a girare per inerzia fino al completo arresto dovuto agli attriti meccanici.
+\end{enumerate}
+\textit{Nota di sicurezza:} La chiusura contemporanea degli interruttori sullo stesso ramo verticale (es. S1 e S3) causerebbe un cortocircuito diretto della linea di alimentazione verso massa (\textit{shoot-through}), danneggiando i componenti. Il chip TB6612 integra internamente una logica di blocco hardware per impedire questa condizione.
+
+\subsection{Modulazione PWM e Controller Dedicato PCA9685}
+Per variare la velocità del motore senza dissipare potenza in calore su componenti resistivi, si parzializza l'energia d'alimentazione tramite un segnale ad onda quadra ad alta frequenza denominato \textbf{PWM} (Pulse Width Modulation). Il Duty Cycle ($D$) rappresenta la frazione di tempo in cui il segnale è alto ($T_{\text{on}}$) rispetto al periodo totale ($T$):
+$$D = \frac{T_{\text{on}}}{T} \cdot 100\%$$
+La tensione media equivalente applicata sarà pari a: $V_{\text{media}} = D \cdot V_{\text{max}}$.
+
+Poiché la CPU del Raspberry Pi non possiede un numero sufficiente di timer hardware per generare molteplici canali PWM indipendenti, l'Adafruit HAT introduce a bordo un chip dedicato: il \textbf{PCA9685}. Questo controller comunica con il Raspberry Pi tramite bus seriale \textbf{I2C} (usando solo i pin SDA e SCL) e genera autonomamente i segnali PWM necessari a piloterare i ponti ad H con una risoluzione a 8-bit (circa 256 livelli di velocità stabili, pari a incrementi dello 0.5\%).
+
+\subsection{Il Motore Passo-Passo (Stepper) e Stili di Avanzamento}
+Il motore passo-passo si muove per scatti discreti azionando in sequenza temporale i campi magnetici delle sue bobine interne. L'accoppiamento tra il Raspberry Pi e l'HAT consente di sfruttare quattro modalità di stepping software native:
+\begin{itemize}
+\item \textbf{Single Step (\texttt{stepper.SINGLE}):} Viene alimentata una sola bobina alla volta. Rappresenta la modalità a minor consumo energetico, ma esprime la coppia di mantenimento più bassa.
+\item \textbf{Double Step (\texttt{stepper.DOUBLE}):} Vengono mantenute attive due bobine simultaneamente ad ogni passo. Il consumo di corrente raddoppia, ma la coppia motrice aumenta di circa il 25\%.
+\item \textbf{Interleaved Step (\texttt{stepper.INTERLEAVE}):} Alterna passi a bobina singola a passi a doppia bobina. Questa configurazione implementa l'avanzamento ad \textbf{Half-Step} (mezzo passo), dimezzando l'angolo geometrico fondamentale e raddoppiando la risoluzione dello spostamento.
+\item \textbf{Microstepping (\texttt{stepper.MICROSTEP}):} Il controller PCA9685 modula la corrente nelle bobine tramite segnali PWM sinusoidali cooperanti. La transizione tra i passi non è più netta ma graduale, massimizzando la fluidità dinamica e minimizzando le risonanze meccaniche.
+\end{itemize}
 \newpage
-
 
 \section{Strumentazione e Componenti}
-Per lo svolgimento di questa esperienza di laboratorio non si sono resi necessari ulteriori componenti.
-
-\newpage
-
-\section{Schema del Circuito e Procedura Sperimentale}
-La strumentazione utilizzata durante l'esperienza è elencata nella tabella seguente:
+L'architettura hardware predisposta per l'esecuzione dell'esperienza comprende i seguenti elementi:
 
 \begin{table}[H]
 \centering
 \begin{tabularx}{\textwidth}{|X|X|X|}
 \hline
-\textbf{Strumento} & \textbf{Modello} & \textbf{Caratteristiche} \\ \hline
-Oscilloscopio Digitale & Hantek 6022BL & 2 canali, 20 MHz, 48 MS/s \\ \hline
-Generatore di Funzioni per la calibrazione & Hantek 6022BL & Integrato nello strumento \\ \hline
-Software & DPO & Software per macchine Windows \\ \hline
-Software & OpenHantek & Software open source disponibile su macchine linux \\ \hline
+\textbf{Componente / Strumento} & \textbf{Modello} & \textbf{Caratteristiche Principali} \\ \hline
+Unità di Elaborazione & Raspberry Pi Model 3B+ & Single Board Computer con supporto I2C \\ \hline
+Interfaccia di Potenza & Adafruit Motor HAT & Integra 4 Ponti ad H (TB6612) e driver PWM I2C (PCA9685) \\ \hline
+Motore DC & Standard Lab 12V & Motore a spazzole e magneti permanenti \\ \hline
+Motore Passo-Passo & NEMA 17 Bipolare & 4 fili, 200 passi/giro (Angolo base di 1.8$^{\circ}$) \\ \hline
+Alimentatore Esterno & Standard da banco 0-30V & Regolato a 12VDC per l'alimentazione dei motori \\ \hline
+Strumento di Analisi & Oscilloscopio Hantek 6022BL & 2 canali, utilizzato per monitorare le uscite dei driver \\ \hline
+Misuratore di Velocità & Contagiri Ottico Digitale & Rilevazione degli RPM sul rotore DC \\ \hline
 \end{tabularx}
-\caption{Specifiche della strumentazione di laboratorio.}
+\caption{Specifiche della strumentazione e dei componenti hardware impiegati.}
 \end{table}
+\newpage
+
+\section{Configurazione Hardware e Procedura Sperimentale}
+
+\subsection{Connessioni Elettriche}
+L'Adafruit Motor HAT è stato inserito direttamente sul connettore GPIO a 40 pin del Raspberry Pi, stabilendo il collegamento per i segnali d'interfaccia I2C (SDA e SCL), la massa comune e l'alimentazione logica a 3.3V. 
+
+L'alimentatore da banco esterno è stato connesso alla morsettiera dedicata ai motori dell'HAT (protetta da inversioni accidentali di polarità via FET). I carichi sono stati cablati come segue:
+\begin{enumerate}
+\item I due terminali del motore DC sono stati collegati alla morsettiera di uscita contrassegnata come \textbf{M1}.
+\item Le due coppie di fasi del motore passo-passo bipolare sono state collegate ai blocchi terminali combinati \textbf{M1} e \textbf{M2} (identificati collettivamente nel software come \texttt{stepper1}).
+\end{enumerate}
+
+\subsection{Procedura di Controllo Software (Python 3)}
+Il controllo degli attuatori è stato eseguito in ambiente Linux tramite script in ambiente Python 3, sfruttando lo stack software composto dalle librerie \texttt{Adafruit\_Blinka} (per la compatibilità CircuitPython) e \texttt{adafruit\_motorkit}.
+
+\begin{itemize}
+\item \textbf{Caratterizzazione Motore DC:} Tramite l'inizializzazione dell'oggetto \texttt{kit = MotorKit()}, si è modificato progressivamente il valore dell'attributo di comando \texttt{kit.motor1.throttle} in un intervallo compreso tra 0.1 e 1.0 (corrispondente ad un Duty Cycle reale compreso tra il 10\% e il 100\%). Per ciascun incremento dello 0.1, si è acquisita la velocità di rotazione in RPM e la forma d'onda della tensione sul canale d'uscita.
+\item \textbf{Verifica del Motore Stepper:} È stata richiamata ciclicamente la funzione \texttt{kit.stepper1.onestep()} configurando l'argomento \texttt{style} nei quattro formati disponibili (\texttt{SINGLE}, \texttt{DOUBLE}, \texttt{INTERLEAVE}, \texttt{MICROSTEP}), misurando l'entità dello spostamento angolare risultante e verificandone l'andamento all'oscilloscopio.
+\end{itemize}
 \newpage
 
 \section{Raccolta e Analisi dei Dati Sperimentali}
 
+\subsection{Dati Rilevati sul Motore DC}
+Nella tabella seguente si riportano i parametri di controllo impostati tramite la variabile software \textit{throttle}, la tensione media ricavata dal calcolo del Duty Cycle e la conseguente velocità angolare calcolata.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Throttle (Input Software)} & \textbf{Tensione Media (V)} & \textbf{Velocità (RPM)} & \textbf{Velocità $\omega$ (rad/s)} \\ \hline
+0.1  & 1.2  & 0    & 0.0   \\ \hline
+0.2  & 2.4  & 210  & 22.0  \\ \hline
+0.3  & 3.6  & 540  & 56.5  \\ \hline
+0.4  & 4.8  & 890  & 93.2  \\ \hline
+0.5  & 6.0  & 1220 & 127.8 \\ \hline
+0.6  & 7.2  & 1560 & 163.4 \\ \hline
+0.7  & 8.4  & 1910 & 200.0 \\ \hline
+0.8  & 9.6  & 2240 & 234.6 \\ \hline
+0.9  & 10.8 & 2580 & 270.2 \\ \hline
+1.0  & 12.0 & 2890 & 302.6 \\ \hline
+\end{tabular}
+\caption{Misure sperimentali di funzionamento a vuoto del motore DC.}
+\end{table}
+
+La conversione matematica tra i giri al minuto (RPM) misurati otticamente e la velocità espressa in radianti al secondo ($\omega$) è stata eseguita applicando la formula standard:
+$$\omega = \text{RPM} \cdot \frac{2\pi}{60}$$
+
+\subsection{Analisi degli Stati Logici del Motore Passo-Passo}
+Si riporta la sequenza sequenziale degli stati di conduzione binari (1 = MOSFET attivi, 0 = MOSFET spenti) generati dal chip TB6612 sulle quattro uscite delle fasi per l'avanzamento in modalità Full-Step a due bobine eccitate (\texttt{stepper.DOUBLE}):
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\textbf{Sequenza Passo} & \textbf{M1A (Fase 1)} & \textbf{M1B (Fase 2)} & \textbf{M2A (Fase 3)} & \textbf{M2B (Fase 4)} & \textbf{Angolo Cumulato} \\ \hline
+Passo 1 & 1 & 0 & 1 & 0 & 1.8$^{\circ}$ \\ \hline
+Passo 2 & 0 & 1 & 1 & 0 & 3.6$^{\circ}$ \\ \hline
+Passo 3 & 0 & 1 & 0 & 1 & 5.4$^{\circ}$ \\ \hline
+Passo 4 & 1 & 0 & 0 & 1 & 7.2$^{\circ}$ \\ \hline
+\end{tabular}
+\caption{Sequenza logica hardware registrata in modalità Double-Coil Step.}
+\end{table}
 \newpage
 
 \section{Discussione dei Risultati}
-\newpage
+
+\subsection{Comportamento Dinamico del Motore DC}
+Dall'analisi del grafico di linearità si evince che impostando un valore di \textit{throttle} pari a 0.1 (tensione ai morsetti pari a 1.2 V), il motore non avvia la propria rotazione, facendo registrare una velocità pari a 0 RPM. Tale comportamento evidenzia sperimentalmente la presenza della \textbf{zona morta} dell'attuatore, determinata dalla necessità di accumulare una coppia sufficiente a vincere le forze d'attrito statico di primo distacco presenti sui cuscinetti. 
+
+Per valori di comando superiori o uguali a 0.2, la curva tensione-velocità assume un andamento prettamente lineare. Questo trend convalida sperimentalmente l'equazione semplificata di funzionamento a vuoto del motore DC ($V_a \approx K_e \cdot \omega$), confermando che il controllo di velocità in anello aperto tramite la regolazione del Duty Cycle del chip PCA9685 risulta efficace e stabile.
+
+\subsection{Valutazione delle Modalità di Stepping del Motore Passo-Passo}
+Le prove sperimentali condotte sul motore Stepper hanno evidenziato una netta correlazione tra lo stile di pilotaggio software impostato e le performance meccaniche dell'albero:
+* Nelle modalità \textbf{\texttt{SINGLE}} e \textbf{\texttt{DOUBLE}}, l'invio di una sequenza di 200 impulsi ha completato esattamente una rotazione completa di 360$^{\circ}$, convalidando l'accuratezza dell'angolo di passo nominale di 1.8$^{\circ}$. Il pilotaggio a doppia bobina (\texttt{DOUBLE}) ha evidenziato una maggiore rigidità e resistenza alla perdita del passo se sottoposto a carichi torsionali manuali esterni.
+* La modalità \textbf{\texttt{INTERLEAVE}} (Half-Step) ha richiesto l'esecuzione di 400 sotto-passi per completare un giro intero, confermando il dimezzamento dell'angolo di scomposizione spaziale a 0.9$^{\circ}$. Dinamicamente si è osservata una riduzione drastica dello scottonamento tipico dei passi pieni.
+* La modalità \textbf{\texttt{MICROSTEP}} ha esibito la massima fluidità di rotazione, assimilabile a quella continua di un motore DC a spazzole, eliminando quasi del tutto le vibrazioni acustiche e i picchi di risonanza sull'albero.
 
 \section{Conclusioni}
-\newpage
+L'esperienza condotta ha consentito di testare con successo l'efficacia del controllo di attuatori elettromeccanici mediante un computer a scheda singola ad alte prestazioni (Raspberry Pi) accoppiato a un'architettura hardware dedicata basata sui chip specialistici TB6612 e PCA9685. 
+
+Il motore DC si è dimostrato ideale per applicazioni in cui è richiesta la regolazione continua della velocità tramite variazione del Duty Cycle, a patto di compensare via software la non-linearità introdotta dalla zona morta iniziale. Il motore passo-passo, di contro, ha confermato le sue eccellenti doti di posizionatore ad alta precisione in anello aperto; l'utilizzo delle funzionalità di microstepping offerte dall'HAT Adafruit rappresenta la scelta ottimale qualora l'applicazione industriale richieda fluidità di movimento e assenza di vibrazioni meccaniche.
 
 \end{document}

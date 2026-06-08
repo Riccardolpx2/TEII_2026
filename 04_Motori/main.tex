@@ -2,56 +2,95 @@
 \usepackage[rightcaption]{sidecap}
 \usepackage{graphicx} % Required for inserting images
 \usepackage{multirow}
+\usepackage[top=4cm, bottom=4cm, left=3cm, right=3cm]{geometry}
+\usepackage[labelfont=bf, justification=raggedright, singlelinecheck=false]{caption}
+\usepackage[european, americanvoltages]{circuitikz} % Per i circuiti
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18} % Ottimizza la compatibilità di PGFPlots
+\usepgfplotslibrary{groupplots} % Consente di allineare modulo e fase
 \newcommand\tab[1][1cm]{\hspace*{#1}}
 \usepackage[T1]{fontenc}
 \usepackage{appendix}
 \usepackage{tabularx}
 \usepackage{float}
+\usepackage{tcolorbox}
+\usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{eso-pic} % for \BgThispage
 \usepackage{tikz}
-\usepackage{enumitem}
-\usepackage{xcolor-solarized}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usetikzlibrary{arrows.meta}
 \usepackage[pages=some]{background}
 \usepackage[italian]{babel}
+\usepackage[colorlinks=true, linkcolor=black, citecolor=black, filecolor=black, urlcolor=blue]{hyperref}
+\addto\captionsitalian{\renewcommand{\contentsname}{Indice}}
 \backgroundsetup{scale=1.5,anchor=right,angle=0,opacity=0.1,contents={\includegraphics[scale=1]{Misc/logo_standard (1).png}}}
 
+% FORMATTAZIONE SOTTOTITOLI
+%-----------------------------------------------------------
+\titleformat{\subsection}
+{\normalfont\Large\bfseries}{\thesubsection}{1em}{}
 
-% serve per inserire immagini
-%    \begin{figure}[H]
-%   \centering
-%    \includegraphics[width=0.5\textwidth]{Percorso File da inserire}
-%    \caption{Commento dell'immagine}
-%    \end{figure}
+\titleformat{\section}
+{\normalfont\Large\bfseries}{\thesection}{1em}{}
+%-----------------------------------------------------------
 
+% FORMATTAZIONE INDICE
+%-----------------------------------------------------------
+\renewcommand{\cftsecfont}{\normalfont\Large\bfseries}
+\renewcommand{\cftsecpagefont}{\normalfont\Large\bfseries}
 
+\renewcommand{\cftsubsecfont}{\normalfont\Large}
+\renewcommand{\cftsubsecpagefont}{\normalfont\Large}
 
+\setlength{\cftbeforesecskip}{0.5cm} 
+\setlength{\cftbeforesubsecskip}{0.3cm}
+%-----------------------------------------------------------
+
+% TITOLO
+%-----------------------------------------------------------
 \title{
-    Relazione : Caratterizzazione di un Motore in Corrente Continua e Controllo di un Motore Passo-Passo \\ 
+    Relazione : Caratterizzazione di un Motore in Corrente Continua e Controllo di un Motore \\ 
     \vspace{0.3cm} 
-    \Large Gruppo 100
+    \Large Gruppo 03
 }
+%-----------------------------------------------------------
+
+% AUTORI
+%-----------------------------------------------------------
 \author{
-  Lorenzo Allocco \\ -- Mat. 061270XXXX
-  \and
+  Lorenzo Allocco \\ -- Mat. 0612709084
+  \\ \\
   Riccardo La Porta \\ -- Mat. 0612709691
-  \and 
-  Francesco Grimaldi \\ -- Mat.0612708839
-  \and
-  Alessandro Altieri \\ -- Mat.0612709239
+  \\ \\
+  Francesco Grimaldi \\ -- Mat. 0612708839
+  \\ \\
+  Alessandro Altieri \\ -- Mat. 0612709239
 }
-\date{5 Marzo 2026}
+
+\date{5 Giugno 2026}
+
 \begin{document}
-\AddToShipoutPictureBG*{%
+\BgThispage
+
+\AddToShipoutPictureBG*{
   \begin{tikzpicture}[remember picture, overlay]
     \node [anchor=north west, inner sep=30pt] at (current page.north west)
       {\includegraphics[height=1.5cm]{Misc/diem (1).png}};
   \end{tikzpicture}
 }
-\BgThispage
+%-----------------------------------------------------------
+
 \maketitle
+
+% INDICE
+%-----------------------------------------------------------
 \newpage
 \tableofcontents
 \newpage
+%-----------------------------------------------------------
+
 \section{Obiettivi dell'esperienza}
 La seguente relazione si pone come obiettivo quello di descrivere l'esperienza di laboratorio tenutasi
 nell'ambito del corso di Tecnologie Elettriche per l'informatica Industriale.\\

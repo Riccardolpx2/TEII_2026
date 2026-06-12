@@ -5,7 +5,7 @@
 \usepackage[T1]{fontenc}            % Codifica font
 \usepackage[italian]{babel}         % Lingua italiana
 \usepackage{geometry}               % Gestione margini
- \geometry{a4paper, margin=2.5cm}
+\geometry{a4paper, margin=2.5cm}
 \usepackage{graphicx}               % Inserimento immagini
 \usepackage{float}
 \usepackage{hyperref}               % Link cliccabili
@@ -44,6 +44,7 @@
 % FRONTESPIZIO
 % ==========================================
 \pagenumbering{Alph} % Evita il conflitto di identificatori di pagina per hyperref
+
 \begin{titlepage}
  
     \centering
@@ -56,7 +57,7 @@
     \large Corso: \textbf{Tecnologie Elettriche per l'Informatica Industriale} \\
     \large Anno Accademico: \textbf{2025/2026} \\
     
-    \vspace{2.5cm}
+    \vspace{2cm}
     
     \LARGE \textbf{Studio e caratterizzazione di sensori} \\
     \Large \textbf{Circuito analogico per il rilevamento di fiamma: analisi, filtraggio RC e discriminazione dei disturbi non desiderati} \\
@@ -86,7 +87,6 @@
         \end{tabular}
     \end{table}
 
-
 \end{titlepage}
 
 \newpage
@@ -98,175 +98,270 @@
 % INTRODUZIONE
 % ==========================================
 \section{Introduzione}
-Ci siamo posti il problema di avere a disposizione un circuito analogico capace di mettere insieme tutte
-le conoscenze acquisite nel corso. Abbiamo posto attenzione soprattutto alla progettazione di un sistema
-tollerante ai disturbi caratteristici del mondo reale, completamente in accordo con l'obiettivo di proporre
-un'idea sicuramente applicabile nella realtà. Il presente documento presenterà l'analisi, il dimensionamento e la progettazione di un circuito
-integrato analogico per il rilevamento di fiamma a infrarossi, sviluppato con l'obiettivo di non essere un semplice dispositivo di rilevamento, ma anche un'architettura di controllo analogica completa e autosufficiente. Il sistema, infatti, non si limita a captare lo stimolo luminoso, ma elabora il segnale attraverso blocchi sequenziali di condizionamento e isolamento, fino a generare un output di commutazione netto e privo di incertezze, pronto per interfacciare e pilotare direttamente uno stadio attuatore per l'estinzione dell'incendio.
+    Ci siamo posti il problema di avere a disposizione un circuito analogico capace di mettere insieme tutte
+    le conoscenze acquisite nel corso. Abbiamo posto attenzione soprattutto alla progettazione di un sistema
+    tollerante ai disturbi caratteristici del mondo reale, completamente in accordo con l'obiettivo di proporre
+    un'idea sicuramente applicabile nella realtà. Il presente documento presenterà l'analisi, il dimensionamento
+    e la progettazione di un circuito integrato analogico per il rilevamento di fiamma a infrarossi, sviluppato
+    con l'obiettivo di non essere un semplice dispositivo di rilevamento, ma anche un'architettura di controllo
+    analogica completa e autosufficiente. Il sistema, infatti, non si limita a captare lo stimolo luminoso, ma
+    elabora il segnale attraverso blocchi sequenziali di condizionamento e isolamento, fino a generare un output
+    di commutazione netto e privo di incertezze, pronto per interfacciare e pilotare direttamente uno stadio attuatore
+    per l'estinzione dell'incendio.
 
-L'architettura circuitale proposta si articola in una struttura modulare a blocchi sequenziali,
-ciascuno deputato a una specifica funzione di elaborazione del segnale. Nello specifico, la
-relazione guiderà il lettore attraverso la comprensione dei seguenti stadi hardware:
+    L'architettura circuitale proposta si articola in una struttura modulare a blocchi sequenziali,
+    ciascuno deputato a una specifica funzione di elaborazione del segnale. Nello specifico, la
+    relazione guiderà il lettore attraverso la comprensione dei seguenti stadi hardware:
 
-\begin{itemize}
-    \item \textbf{Stadio di Trasduzione Ottica:} Analisi del fotodiodo, verrà illustrato il principio fisico secondo cui la radiazione IR genera una debole fotocorrente e il ruolo della resistenza di carico $R_1$.
-    
-    \item \textbf{Stadi di Isolamento ad Alta Impedenza (Voltage Follower 1 e 2):} Studio degli amplificatori operazionali configurati come inseguitori di tensione con retroazione e la loro natura disaccoppiante.
-    
-    \item \textbf{Stadio di Filtraggio Passa-Basso:} Dimensionamento di un filtro d'ordine singolo (rete $RC$) dedicato all'abbattimento del rumore ad alta frequenza e ai disturbi dovuti al ronzio di rete delle illuminazioni artificiali.
-    
-    \item \textbf{Stadio di Integrazione Temporale (Debouncer Analogico):} Trattazione del cuore logico del sistema di sicurezza. Verrà spiegato matematicamente come il blocco sfrutti la natura dei circuiti RC per ricreare un sistema che inibisce false letture. Con questo metodo sarà poi possibile dare al circuito una "tolleranza" rispetto al tempo di esposizione della fiamma al fotodiodo.
-    
-    \item \textbf{Stadio di Commutazione e Output (Comparatore di Soglia):} Descrizione dell'ultimo operazionale operante in anello aperto come comparatore di tensione. Verrà analizzato il sistema con cui il circuito riesce a capire quando l'ingresso del sistema viene sollecitato effettivamente da una fiamma.
-\end{itemize}
+    \begin{itemize}
+        \item \textbf{Stadio di Trasduzione Ottica:} Analisi del fotodiodo, verrà illustrato il principio fisico secondo
+            cui la radiazione IR genera una debole fotocorrente e il ruolo della resistenza di carico $R_1$.
+        
+        \item \textbf{Stadi di Isolamento ad Alta Impedenza (Voltage Follower 1 e 2):} Studio degli amplificatori operazionali
+            configurati come inseguitori di tensione con retroazione e la loro natura disaccoppiante.
+        
+        \item \textbf{Stadio di Filtraggio Passa-Basso:} Dimensionamento di un filtro d'ordine singolo (rete $RC$) dedicato
+            all'abbattimento del rumore ad alta frequenza e ai disturbi dovuti al ronzio di rete delle illuminazioni artificiali.
+        
+        \item \textbf{Stadio di Integrazione Temporale (Debouncer Analogico):} Trattazione del cuore logico del sistema di sicurezza.
+            Verrà spiegato matematicamente come il blocco sfrutti la natura dei circuiti RC per ricreare un sistema che inibisce false
+            letture. Con questo metodo sarà poi possibile dare al circuito una "tolleranza" rispetto al tempo di esposizione della fiamma
+            al fotodiodo.
+        
+        \item \textbf{Stadio di Commutazione e Output (Comparatore di Soglia):} Descrizione dell'ultimo operazionale operante in anello
+            aperto come comparatore di tensione. Verrà analizzato il sistema con cui il circuito riesce a capire quando l'ingresso del
+            sistema viene sollecitato effettivamente da una fiamma.
+    \end{itemize}
 
 \newpage
 \section{Sensore scelto e realtà di interesse}
-Il cuore dello stadio di trasduzione ottica è costituito dal fotodiodo al silicio \textbf{BP104}, un componente con un filtro plastico integrato per la luce diurna che, bloccando la radiazione visibile, isola lo spettro \textbf{IR-A} (Infrarosso Vicino). 
+    Il cuore dello stadio di trasduzione ottica è costituito dal fotodiodo al silicio \textbf{BP104}, un componente con un filtro plastico
+    integrato per la luce diurna che, bloccando la radiazione visibile, isola lo spettro \textbf{IR-A} (Infrarosso Vicino). 
 
-Il principio di funzionamento del componente si basa sull'effetto fotoelettrico interno: quando i fotoni della radiazione IR colpiscono la zona di svuotamento della giunzione, trasferiscono la propria energia agli elettroni di valenza, generando coppie elettrone-lacuna. Essendo configurato in \textbf{modalità fotoconduttiva} (polarizzazione inversa tramite la tensione $V_{in} = +5\text{ V}$ sul catodo), il fotodiodo traduce istantaneamente questo flusso luminoso in una debole fotocorrente inversa ($I_{\text{ph}}$), rigorosamente lineare rispetto all'irraggiamento ricevuto (Fig. 3). Tale corrente, scorrendo attraverso la resistenza di carico $R_1$, genera ai suoi capi la tensione di ingresso per lo stadio successivo secondo la legge di Ohm:
+    Il principio di funzionamento del componente si basa sull'effetto fotoelettrico interno: quando i fotoni della radiazione IR colpiscono
+    la zona di svuotamento della giunzione, trasferiscono la propria energia agli elettroni di valenza, generando coppie elettrone-lacuna.
+    Essendo configurato in \textbf{modalità fotoconduttiva} (polarizzazione inversa tramite la tensione $V_{in} = +5\text{ V}$ sul catodo),
+    il fotodiodo traduce istantaneamente questo flusso luminoso in una debole fotocorrente inversa ($I_{\text{ph}}$), rigorosamente lineare
+    rispetto all'irraggiamento ricevuto (Fig. 3). Tale corrente, scorrendo attraverso la resistenza di carico $R_1$, genera ai suoi capi la
+    tensione di ingresso per lo stadio successivo secondo la legge di Ohm:
 
-    \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.3\textwidth]{Misc/corrente_inversa.png}
-	\end{figure}
-	
-    \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.4\textwidth]{Misc/pol_diodo.png}
-	\end{figure}	
-	
-\begin{equation}
-    V_{\text{n}} = I_{\text{ph}} \cdot R_1
-\end{equation}
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\textwidth]{Misc/corrente_inversa.png}
+        \end{figure}
+        
+        \begin{figure}[H]
+            \centering
+            \includegraphics[width=0.5\textwidth]{Misc/pol_diodo.png}
+        \end{figure}	
+        
+    \begin{equation}
+        \boxed{V_{\text{n}} = I_{\text{ph}} \cdot R_1}
+    \end{equation}
 
 \section{Descrizione preliminare e assunzioni}
-Per procedere con il dimensionamento analitico e la successiva validazione del circuito, è necessario definire lo scenario operativo, i parametri elettrici fondamentali e le assunzioni ideali che governano il comportamento dei componenti scelti.
+    Per procedere con il dimensionamento analitico e la successiva validazione del circuito, è necessario definire lo scenario operativo,
+    i parametri elettrici fondamentali e le assunzioni ideali che governano il comportamento dei componenti scelti.
 
-Il sistema è alimentato da una sorgente in corrente continua ($V_{in}$) stabilizzata a $+5\text{V}$, derivata magari tramite uno stadio di regolazione a monte, per garantire un'alimentazione stabile e sicura. Per quanto riguarda i segnali d'ingresso, assumiamo che la radiazione emessa da una fiamma libera nello spettro del vicino infrarosso (lunghezza d'onda tipica $\lambda \approx 940\text{ nm}$) colpisca la superficie sensibile del fotodiodo inducendo una corrente di conduzione inversa proporzionale all'irraggiamento ottico.
+    Il sistema è alimentato da una sorgente in corrente continua ($V_{in}$) stabilizzata a $+5\text{V}$, derivata magari tramite uno stadio
+    di regolazione a monte, per garantire un'alimentazione stabile e sicura. Per quanto riguarda i segnali d'ingresso, assumiamo che la
+    radiazione emessa da una fiamma libera nello spettro del vicino infrarosso (lunghezza d'onda tipica $\lambda \approx 940\text{ nm}$)
+    colpisca la superficie sensibile del fotodiodo inducendo una corrente di conduzione inversa proporzionale all'irraggiamento ottico.
 
 % ==========================================
 % PROGETTAZIONE
 % ==========================================
 \section{Caratteristiche fisiche}
 
+    Come anticipato in precedenza, per la realizzazione del sistema in questione sono stati impiegati vari componenti "non banali", che andremo
+    ad analizzare più nel dettaglio nei paragrafi 4.1 e 4.2 sottostanti. Ovviamente ci concentreremo anche nel descrivere il ruolo
+    di ogni blocco, il dimensionamento dei componenti e le valutazioni teoriche fatte. Qui sotto è riportato lo schema elettrico dettagliato del
+    circuito:
 
-\begin{figure}[H]
-\centering
-\begin{circuitikz}[scale=0.8, transform shape]
-      
-      % ==========================================
-      % LINEA DI MASSA COMUNE
-      % ==========================================
-      % AGGIUNTO "{}" ALLA FINE DI QUESTA LINEA PER RISOLVERE L'ERRORE TIKZ
-      \draw (0, 0) node[left] {GND} node[circle, fill, inner sep=1.2pt] {} -- (10.5, 0) node[ground] {} -- (21,0) node[right] {GND} node[circle, fill, inner sep=1.2pt] {};
-      
-      % ==========================================
-      % 1. STADIO: FOTODIODO (Inversa per modalità fotoconduttiva)
-      % ==========================================
-      \draw (0,3) node[left] {$V_{in}$} node[circle, fill, inner sep=1.2pt] {} -- (1,3)
-            to[photodiode, l_=D, invert] (2.5,3) coordinate (nodoSens);
-      \draw (nodoSens) to[R, l_=$R_1$] (2.5,0);
-      
-      % Scatola tratteggiata Fotodiodo
-      \draw[dashed, gray] (0.5,4) rectangle (3.3,0.5);
-      \node[text=gray, font=\tiny\bfseries] at (2,4.2) {FOTODIODO};
+    % Disegno dello schema del diagramma
+    \begin{figure}[H]
+    \centering
+        \begin{circuitikz}[scale=0.75, transform shape]
+            
+            % ==========================================
+            % LINEA DI MASSA COMUNE
+            % ==========================================
+            % AGGIUNTO "{}" ALLA FINE DI QUESTA LINEA PER RISOLVERE L'ERRORE TIKZ
+            \draw (0, 0) node[left] {GND} node[circle, fill, inner sep=1.2pt] {} -- (10.5, 0) node[ground] {} -- (21,0) node[right] {GND} node[circle, fill, inner sep=1.2pt] {};
+            
+            % ==========================================
+            % 1. STADIO: FOTODIODO (Inversa per modalità fotoconduttiva)
+            % ==========================================
+            \draw (0,3) node[left] {$V_{in}$} node[circle, fill, inner sep=1.2pt] {} -- (1,3)
+                    to[photodiode, l_=D, invert] (2.5,3) coordinate (nodoSens);
+            \draw (nodoSens) to[R, l_=$R_1$] (2.5,0);
+            
+            % Scatola tratteggiata Fotodiodo
+            \draw[dashed, gray] (0.5,4) rectangle (3.3,0.5);
+            \node[text=gray, font=\tiny\bfseries] at (2,4.2) {FOTODIODO};
 
-      % ==========================================
-      % 2. STADIO: VOLTAGE FOLLOWER 1 (AMP1)
-      % ==========================================
-      \draw (5,2.5) node[op amp, yscale=-1] (amp1) {};
-      \node[left, font=\tiny, yshift=-0.15cm] at (amp1.-) {};
-      \node[left, font=\tiny, yshift=0.15cm] at (amp1.+) {};
-      \node[above, font=\small] at (4.9, 2.3) {AMP1};
-      \draw (nodoSens) -- (amp1.+);
+            % ==========================================
+            % 2. STADIO: VOLTAGE FOLLOWER 1 (AMP1)
+            % ==========================================
+            \draw (5,2.5) node[op amp, yscale=-1] (amp1) {};
+            \node[left, font=\tiny, yshift=-0.15cm] at (amp1.-) {};
+            \node[left, font=\tiny, yshift=0.15cm] at (amp1.+) {};
+            \node[above, font=\small] at (4.9, 2.3) {AMP1};
+            \draw (nodoSens) -- (amp1.+);
 
-      % La retroazione si chiude sul meno (-)
-      \draw (amp1.out) -- (6.2,2.5) coordinate (nodoVo) {}
-            -- (6.2,1.2) -- (3.8,1.2) -- (amp1.-);
-      \node[above, font=\tiny] at (6.1, 2.5) {$V_o$};
+            % La retroazione si chiude sul meno (-)
+            \draw (amp1.out) -- (6.2,2.5) coordinate (nodoVo) {}
+                    -- (6.2,1.2) -- (3.8,1.2) -- (amp1.-);
+            \node[above, font=\tiny] at (6.1, 2.5) {$V_o$};
 
-      % Disegno un gradino per tornare a y=3
-      \draw (nodoVo) -- (6.5, 2.5) -- (6.5, 3) coordinate (nodoLeftR2);
+            % Disegno un gradino per tornare a y=3
+            \draw (nodoVo) -- (6.5, 2.5) -- (6.5, 3) coordinate (nodoLeftR2);
 
-      % Scatola tratteggiata AMP1
-      \draw[dashed, gray] (3.6,4) rectangle (6.7,0.5);
-      \node[text=gray, font=\tiny\bfseries] at (5.1,4.2) {VOLTAGE FOLLOWER};
+            % Scatola tratteggiata AMP1
+            \draw[dashed, gray] (3.6,4) rectangle (6.7,0.5);
+            \node[text=gray, font=\tiny\bfseries] at (5.1,4.2) {VOLTAGE FOLLOWER};
 
-      % ==========================================
-      % 3. STADIO: FILTRO PASSA-BASSO
-      % ==========================================
-      \draw (nodoLeftR2) to[R, l_=$R_2$] (9.5,3) coordinate (nodoC1) {};
-      \draw (nodoC1) to[C, l_=$C_1$] (9.5,0);
-      
-      % Scatola tratteggiata Filtro
-      \draw[dashed, gray] (7.1,4) rectangle (10.3,0.5);
-      \node[text=gray, font=\tiny\bfseries] at (8.7,4.2) {FILTRO PASSA-BASSO};
+            % ==========================================
+            % 3. STADIO: FILTRO PASSA-BASSO
+            % ==========================================
+            \draw (nodoLeftR2) to[R, l_=$R_2$] (9.5,3) coordinate (nodoC1) {};
+            \draw (nodoC1) to[C, l_=$C_1$] (9.5,0);
+            
+            % Scatola tratteggiata Filtro
+            \draw[dashed, gray] (7.1,4) rectangle (10.3,0.5);
+            \node[text=gray, font=\tiny\bfseries] at (8.7,4.2) {FILTRO PASSA-BASSO};
 
-      % ==========================================
-      % 4. STADIO: VOLTAGE FOLLOWER 2 (AMP2)
-      % ==========================================
-      \draw (12,2.5) node[op amp, yscale=-1] (amp2) {};
-      \node[left, font=\tiny, yshift=0.15cm] at (amp2.+) {};
-      \node[left, font=\tiny, yshift=-0.15cm] at (amp2.-) {};
-      \node[above, font=\small] at (11.9, 2.3) {AMP2};
+            % ==========================================
+            % 4. STADIO: VOLTAGE FOLLOWER 2 (AMP2)
+            % ==========================================
+            \draw (12,2.5) node[op amp, yscale=-1] (amp2) {};
+            \node[left, font=\tiny, yshift=0.15cm] at (amp2.+) {};
+            \node[left, font=\tiny, yshift=-0.15cm] at (amp2.-) {};
+            \node[above, font=\small] at (11.9, 2.3) {AMP2};
 
-      % Collegamenti agli ingressi
-      \draw (nodoC1) -- (amp2.+);
-      \draw (amp2.out) -- (13.2,1.2) -- (10.8,1.2) -- (amp2.-);    
-      \node[above, font=\tiny] at (13.2, 2.6) {$V_s$};
-      
-      % Disegno un gradino per tornare a y=3
-      \draw (amp2.out) -- (13.5, 2.5) -- (13.5, 3) coordinate (nodoLeftR3);
+            % Collegamenti agli ingressi
+            \draw (nodoC1) -- (amp2.+);
+            \draw (amp2.out) -- (13.2,1.2) -- (10.8,1.2) -- (amp2.-);    
+            \node[above, font=\tiny] at (13.1, 2.5) {$V_s$};
+            
+            % Disegno un gradino per tornare a y=3
+            \draw (amp2.out) -- (13.5, 2.5) -- (13.5, 3) coordinate (nodoLeftR3);
 
-      % Scatola tratteggiata AMP2
-      \draw[dashed, gray] (10.7,4) rectangle (13.7,0.5);
-      \node[text=gray, font=\tiny\bfseries] at (12.2,4.2) {VOLTAGE FOLLOWER};
+            % Scatola tratteggiata AMP2
+            \draw[dashed, gray] (10.7,4) rectangle (13.7,0.5);
+            \node[text=gray, font=\tiny\bfseries] at (12.2,4.2) {VOLTAGE FOLLOWER};
 
-      % ==========================================
-      % 5. STADIO: DEBOUNCER ANALOGICO
-      % ==========================================
-      \draw (nodoLeftR3) to[R, l_=$R_3$] (16.5,3) coordinate (nodoC2) {};
-      \draw (nodoC2) to[C, l_=$C_2$] (16.5,0);
-      
-      % Scatola tratteggiata Debouncer
-      \draw[dashed, gray] (14.1,4) rectangle (17.3,0.5);
-      \node[text=gray, font=\tiny\bfseries] at (15.7,4.2) {DEBOUNCER ANALOGICO};
+            % ==========================================
+            % 5. STADIO: DEBOUNCER ANALOGICO
+            % ==========================================
+            \draw (nodoLeftR3) to[R, l_=$R_3$] (16.5,3) coordinate (nodoC2) {};
+            \draw (nodoC2) to[C, l_=$C_2$] (16.5,0);
+            
+            % Scatola tratteggiata Debouncer
+            \draw[dashed, gray] (14.1,4) rectangle (17.3,0.5);
+            \node[text=gray, font=\tiny\bfseries] at (15.7,4.2) {DEBOUNCER ANALOGICO};
 
-      % ==========================================
-      % 6. STADIO: COMPARATORE (AMP3)
-      % ==========================================
-      \draw (19,2.5) node[op amp, yscale=-1] (amp3) {};
-      \node[left, font=\tiny, yshift=0.15cm] at (amp3.+) {};
-      \node[left, font=\tiny, yshift=-0.15cm] at (amp3.-) {};
-      \node[above, font=\small] at (18.9, 2.3) {AMP3};
-      
-      % Collegamenti agli ingressi
-      \draw (nodoC2) -- (amp3.+); 
-      \draw (amp3.-) to[short, -o] (17.8,0.9) node[right, font=\tiny] {$V_{REF}$};
-      
-      % Uscita
-      \draw (amp3.out) -- (20.2, 3) -- (21, 3) node[right] {$V_{out}$} node[circle, fill, inner sep=1.2pt] {};
-      
-      % Scatola tratteggiata Comparatore
-      \draw[dashed, gray] (17.6,4) rectangle (20.4,0.5);
-      \node[text=gray, font=\tiny\bfseries] at (19,4.2) {COMPARATORE};
+            % ==========================================
+            % 6. STADIO: COMPARATORE (AMP3)
+            % ==========================================
+            \draw (19,2.5) node[op amp, yscale=-1] (amp3) {};
+            \node[left, font=\tiny, yshift=0.15cm] at (amp3.+) {};
+            \node[left, font=\tiny, yshift=-0.15cm] at (amp3.-) {};
+            \node[above, font=\small] at (18.9, 2.3) {AMP3};
+            
+            % Collegamenti agli ingressi
+            \draw (nodoC2) -- (amp3.+); 
+            \draw (amp3.-) to[short, -o] (17.8,0.9) node[right, font=\tiny] {$V_{REF}$};
+            
+            % Uscita
+            \draw (amp3.out) -- (20.2, 3) -- (21, 3) node[right] {$V_{out}$} node[circle, fill, inner sep=1.2pt] {};
+            
+            % Scatola tratteggiata Comparatore
+            \draw[dashed, gray] (17.6,4) rectangle (20.4,0.5);
+            \node[text=gray, font=\tiny\bfseries] at (19,4.2) {COMPARATORE};
 
-\end{circuitikz}
-\caption{Schema a blocchi definitivo del sensore di fiamma con debouncer analogico integrato.}
-\label{fig:sensore_fiamma_debouncer}
-\end{figure}
+        \end{circuitikz}
 
+        \caption{Schema a blocchi definitivo del sensore di fiamma con debouncer analogico integrato.}
+        \label{fig:sensore_fiamma_debouncer}
+    \end{figure}
+
+    \subsection{Fotodiodo BP104}
+        Il BP104 è un fotodiodo al silicio di tipo PIN ampiamente utilizzato nei sistemi di ricezione a infrarossi. Rispetto
+        al più generale BPW34 (che ha una capsula trasparente a spettro totale), il BP104 si distingue per specifiche
+        ottiche ed elettriche molto mirate.
+
+        \begin{itemize}
+            \item \textbf{Caratteristiche ottiche e spettrali:} La resina epossidica nera che costituisce il case plastico funge da filtro ottico passante e quindi riesce a
+                tagliare quasi completamente lo spettro della luce visibile (evitando che la luce del sole o delle lampadine di casa
+                falsino la lettura), riuscendo così a essere particolarmente sensibile alla banda IR (È perfettamente accoppiato
+                spettralmente con gli emettitori IR all'arseniuro di gallio).
+
+                Scavando nelle caratteristiche più dettagliate del componente in questione , troviamo una banda di sensibilità che
+                và da $870\text{ nm}$ a $1050\text{ nm}$ (intervallo in cui la sensibilità non scende sotto il 50\% del picco), con
+                un profilo di ricezione decisamente ampio e piatto che va da $+65^\circ$ a $-65^\circ$ circa. A riconferma delle
+                ottime caratteristiche tecniche, abbiamo anche un area radiante sensibile di $7.5\text{ mm}^2$, considerata medio
+                grande per questa categoria, garantendo un'ottima raccolta di fotoni anche con sorgenti distanti.
+            \item \textbf{Caratteristiche elettriche:} Con un'irradiazione $E_e = 1\text{ mW/cm}^2$ a $\lambda = 950\text{ nm}$ e una tensione inversa $V_R = 5\text{ V}$,
+                riusciamo ad ottenere una corrente di luce inversa ($I_{ra}$) di circa $40 - 45\,\mu\text{A}$. Rifacendoci invece a
+                dei parametri più assoluti troviamo anche una corrente di buio inversa ($I_{r0}$) tipicamente tra $2\text{ nA}$ e
+                $30\text{ nA}$, una tensione di breakdown inverso ($V_{(BR)}$) minima di $60\text{ V}$, una tensione a circuito
+                aperto ($V_o$) di $350\text{ mV}$ e una corrente di cortocircuito ($I_k$) di $38\,\mu\text{A}$.
+            \item \textbf{Limiti massimi e caratteristiche termo-meccaniche:} Con una dissipazione di potenza massima di 215 mW, una
+                temperatura operativa nel range da $-40^\circ\text{C}$ a $+100^\circ\text{C}$ e anche un package plastico di tipo Trough-Hole
+                orientato alla ricezione dall'alto troviamo un vantaggio meccanico e chimico dal punto di vista della sensibilità dell'
+                ambiente circostante da parte del fotodiodo che ci permette di determinare in modo abbastanza accurato le condizioni
+                che dobbiamo garantirgli per permettere un lavoro notevolmente accurato.
+        \end{itemize}
+
+    \subsection{Amplificatore Operazionale $\mu$\text{A741}}
+        qua vanno scritte le info dell'amplificatore ma serve il modello (credo un A741)
+    
+    \subsection{1$^\circ$ STADIO - Fotodiodo con convertitore di tensione}
+        Questo stadio si occupa di prendere in input il segnale nella gamma degli infrarossi
+        rilevato dal Fotodiodo (D) nell'ambiente circostante, ovviamente tenendo in considerazione
+        che in questa fase il segnale in input è ancora condizionato dai disturbi indesiderati.
+
+        Il fotodiodo in questione, a causa dell'effetto fotoelettico, genera una corrente (fotocorrente
+        inversa) dell'ordine dei micro-ampere quando viene colpito da una radiazione. Questa corrente è
+        utile che sia convertita in una tensione, grazie alla legge di Ohm, prima di essere utile come
+        input dello stadio successivo.
+
+        Necessitiamo di una tensione anche perchè lo stadio successivo è un voltage follower ed è quindi
+        richiesta una grandezza di questo tipo. Per ovviare a questa necessità si mette un resistore in serie
+        al carico ($R_1$) e si sfrutta la caduta di tensione ai capi di essa. Visto che il fotodiodo genera una
+        corrente molto piccola, abbiamo bisogno di un valore di resistenza molto alta per avere una tensione
+        rilevante da usare come valore significativo, per questo motivo si è scelto una resistenza da 1 M$\Omega$.
+    
+    \subsection{2$^\circ$ e 4$^\circ$ STADIO - Disaccoppiatore di rete}
+        Gli stadi 1, 3 e 5-6 hanno necessità di essere progettati individualmente per essere poi messe insieme in cascata
+        per poter ottenere l'effetto desiderato. Ovviamente per far sì che ciò avvenga abbiamo bisogno di un meccanismo "isolante",
+        detto propriamente disaccoppiante, e ciò si ottiene se in uscita allo stadio precedente si ha un comportamento che tende
+        ad un cortocircuito (bassa impedenza) e in ingresso allo stadio successivo si ha un comportamento che tende ad un aperto
+        (alta impedenza). La configurazione adatta a risolvere questo problema è proprio un amplificatore operazionale in configurazione
+        'voltage follower' (AMP1 e AMP2) visto che la tensione in ingresso viene replicata in uscita ma con le caratteristiche impedenziali
+        descritte prima.
+    \subsection{3$^\circ$ STADIO - Filtro Passa-Basso}
+        
+    \subsection{5$^\circ$ STADIO - Debouncer analogico}
+
+    \subsection{6$^\circ$ STADIO - Comparatore}
+
+    \subsection{Attuatore - lo stadio finale}
 \subsection{Ambiti di applicazione}
-Dettagli sulla configurazione dei router, switch e server (es. DHCP, DNS, Web Server).
+
+
 
 \subsection{Verifica e sperimentazione}
-Risultati dei test (es. output di \texttt{ping}, \texttt{traceroute} o tabelle di routing) che dimostrano il corretto funzionamento.
+
+
 
 % ==========================================
 % CONCLUSIONI
 % ==========================================
 \section{Conclusioni e sviluppi futuri}
-Riflessioni finali sul lavoro svolto e possibili miglioramenti o espansioni della rete progettata.
+
+
+
 
 \end{document}

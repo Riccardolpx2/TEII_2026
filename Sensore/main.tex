@@ -14,8 +14,11 @@
 \usepackage{eso-pic}                % Per inserire immagini in posizioni assolute
 \usepackage{tikz}                   % Disegno vettoriale per il posizionamento
 \usepackage{circuitikz}             % Per il disegno di circuiti elettrici
+\usepackage{pgfplots}               % Per plottare i diagrammi
+\pgfplotsset{compat=1.18}           % Ottimizza la compatibilità e previene avvisi
 \usepackage{float}                  % Per l'utilizzo del posizionamento [H] nelle figure
 \usepackage{amsmath}                % Per il comando \text nelle formule matematiche
+\usepackage{caption}
 
 % --- Pulizia Formattazione Paragrafi ---
 \setlength{\parindent}{0pt}         % Elimina l'indentazione automatica ad inizio paragrafo
@@ -134,6 +137,7 @@
     \end{itemize}
 
 \newpage
+
 \section{Sensore scelto e realtà di interesse}
     Il cuore dello stadio di trasduzione ottica è costituito dal fotodiodo al silicio \textbf{BP104}, un componente con un filtro plastico
     integrato per la luce diurna che, bloccando la radiazione visibile, isola lo spettro \textbf{IR-A} (Infrarosso Vicino). 
@@ -171,6 +175,7 @@
 % ==========================================
 % PROGETTAZIONE
 % ==========================================
+
 \section{Caratteristiche fisiche}
 
     Come anticipato in precedenza, per la realizzazione del sistema in questione sono stati impiegati vari componenti "non banali", che andremo
@@ -298,7 +303,7 @@
                 spettralmente con gli emettitori IR all'arseniuro di gallio).
 
                 Scavando nelle caratteristiche più dettagliate del componente in questione , troviamo una banda di sensibilità che
-                và da $870\text{ nm}$ a $1050\text{ nm}$ (intervallo in cui la sensibilità non scende sotto il 50\% del picco), con
+                va da $870\text{ nm}$ a $1050\text{ nm}$ (intervallo in cui la sensibilità non scende sotto il 50\% del picco), con
                 un profilo di ricezione decisamente ampio e piatto che va da $+65^\circ$ a $-65^\circ$ circa. A riconferma delle
                 ottime caratteristiche tecniche, abbiamo anche un area radiante sensibile di $7.5\text{ mm}^2$, considerata medio
                 grande per questa categoria, garantendo un'ottima raccolta di fotoni anche con sorgenti distanti.
@@ -314,54 +319,281 @@
                 che dobbiamo garantirgli per permettere un lavoro notevolmente accurato.
         \end{itemize}
 
-    \subsection{Amplificatore Operazionale $\mu$\text{A741}}
-        qua vanno scritte le info dell'amplificatore ma serve il modello (credo un A741)
+    \subsection{Amplificatore Operazionale TL082}
+        Il TL082 è un amplificatore operazionale doppio ad alta velocità che integra, in un unico package plastico a 8 pin, due circuiti operazionali 
+        indipendenti. Rispetto ai dispositivi più datati a transistor bipolari (come lo storico $\mu$A741), il TL082 si distingue per l'utilizzo di 
+        transistori a effetto di campo a giunzione (\textbf{JFET}) nello stadio di ingresso, una scelta tecnologica che offre specifiche elettriche e 
+        dinamiche decisamente mirate per il condizionamento dei segnali.
+
+        \begin{itemize}
+            \item \textbf{Caratteristiche d'ingresso ad alta impedenza:} L'impiego dei JFET nella sezione d'ingresso permette al componente di esibire 
+                un'impedenza d'ingresso straordinariamente elevata, tipicamente pari a $10^{12}\,\Omega$ ($1\text{ T}\Omega$). Questa specifica è di 
+                fondamentale importanza nel nostro circuito, poiché garantisce che gli stadi \texttt{AMP1} e \texttt{AMP2} possano interfacciarsi con 
+                le alte resistenze dei blocchi passivi (quali $R_1 = 1\text{ M}\Omega$) senza assorbire correnti significative. 
+
+                A riconferma di ciò, la corrente di polarizzazione d'ingresso (\textit{input bias current}) si attesta su livelli microscopici, con un 
+                valore tipico di appena $30\text{ pA}$ a temperatura ambiente. Questo previene qualsiasi sensibile caduta di tensione parassita ai capi 
+                delle resistenze di condizionamento, azzerando gli errori di offset sistematici che avrebbero altrimenti inficiato l'accuratezza del sensore.
+            
+            \item \textbf{Caratteristiche elettriche e dinamiche di frequenza:} Alimentato in regime singolo a $+5\text{V}$, l'operazionale esprime un elevato 
+                guadagno di tensione ad anello aperto (\textit{open-loop voltage gain}), pari a circa $200\text{ V/mV}$ ($106\text{ dB}$). Dal punto di vista
+                della risposta dinamica, il TL082 presenta uno \textit{Slew Rate} tipico molto elevato, pari a $13\text{ V}/\mu\text{s}$, assistito da una banda 
+                passante a guadagno unitario (\textit{gain-bandwidth product}) di $4\text{ MHz}$. 
+            
+                Questi parametri dinamici assicurano una velocità di risposta eccellente e tempi di assestamento ridotti, traducendosi in una commutazione d'uscita 
+                estremamente netta e priva di oscillazioni spurie nel momento in cui il terzo stadio (\texttt{AMP3}) opera in anello aperto come comparatore di soglia.
+            
+            \item \textbf{Limiti massimi e caratteristiche termo-meccaniche:} Il componente garantisce una temperatura operativa di lavoro standard compresa nel range 
+                tra $0^\circ\text{C}$ e $+70^\circ\text{C}$ (per la serie commerciale standard), con una capacità di dissipazione di potenza massima continua di circa $680\text{ mW}$. 
+            
+                Il package plastico di tipo \textit{Dual In-line Package} (DIP-8) a saldatura passante offre una notevole robustezza meccanica e una disposizione simmetrica dei 
+                pin che semplifica l'ingegnerizzazione del circuito stampato, permettendo di alimentare e configurare entrambi i buffer di isolamento del sistema riducendo l'ingombro 
+                spaziale complessivo sulla scheda.
+        \end{itemize}
     
     \subsection{1$^\circ$ STADIO - Fotodiodo con convertitore di tensione}
-        Questo stadio si occupa di prendere in input il segnale nella gamma degli infrarossi
-        rilevato dal Fotodiodo (D) nell'ambiente circostante, ovviamente tenendo in considerazione
-        che in questa fase il segnale in input è ancora condizionato dai disturbi indesiderati.
+        Questo stadio si occupa di acquisire il segnale luminoso nella banda dell'infrarosso vicino (IR-A) rilevato dal fotodiodo
+        (\texttt{D}) nell'ambiente circostante, tenendo in considerazione che in questa fase l'informazione è ancora fortemente influenzata
+        dai disturbi ad alta frequenza e dalle fluttuazioni ottiche non desiderate.
 
-        Il fotodiodo in questione, a causa dell'effetto fotoelettico, genera una corrente (fotocorrente
-        inversa) dell'ordine dei micro-ampere quando viene colpito da una radiazione. Questa corrente è
-        utile che sia convertita in una tensione, grazie alla legge di Ohm, prima di essere utile come
-        input dello stadio successivo.
+        Il fotodiodo BP104, per via dell'\textbf{effetto fotoelettrico interno}, genera una corrente di conduzione inversa (fotocorrente)
+        proporzionale all'irraggiamento ottico ricevuto. Questa corrente, essendo nell'ordine dei micro-ampere ($\mu\text{A}$), deve essere
+        necessariamente convertita in una tensione elettrica prima di poter essere elaborata dai blocchi successivi. Il disaccoppiatore di 
+        rete posto subito dopo (\texttt{AMP1}), infatti, presenta un'impedenza d'ingresso ideale e richiede una grandezza in tensione per poter
+        operare correttamente.
 
-        Necessitiamo di una tensione anche perchè lo stadio successivo è un voltage follower ed è quindi
-        richiesta una grandezza di questo tipo. Per ovviare a questa necessità si mette un resistore in serie
-        al carico ($R_1$) e si sfrutta la caduta di tensione ai capi di essa. Visto che il fotodiodo genera una
-        corrente molto piccola, abbiamo bisogno di un valore di resistenza molto alta per avere una tensione
-        rilevante da usare come valore significativo, per questo motivo si è scelto una resistenza da 1 M$\Omega$.
-    
-    \subsection{2$^\circ$ e 4$^\circ$ STADIO - Disaccoppiatore di rete}
-        Gli stadi 1, 3 e 5-6 hanno necessità di essere progettati individualmente per essere poi messe insieme in cascata
-        per poter ottenere l'effetto desiderato. Ovviamente per far sì che ciò avvenga abbiamo bisogno di un meccanismo "isolante",
-        detto propriamente disaccoppiante, e ciò si ottiene se in uscita allo stadio precedente si ha un comportamento che tende
-        ad un cortocircuito (bassa impedenza) e in ingresso allo stadio successivo si ha un comportamento che tende ad un aperto
-        (alta impedenza). La configurazione adatta a risolvere questo problema è proprio un amplificatore operazionale in configurazione
-        'voltage follower' (AMP1 e AMP2) visto che la tensione in ingresso viene replicata in uscita ma con le caratteristiche impedenziali
-        descritte prima.
-    \subsection{3$^\circ$ STADIO - Filtro Passa-Basso}
+        Per realizzare questa conversione d'interfaccia, si inserisce un resistore ($R_1$) in serie al fotodiodo, collegato direttamente verso 
+        la massa comune (GND), sfruttando la caduta di potenziale che si sviluppa ai suoi capi per effetto della legge di Ohm. Poiché la fotocorrente 
+        generata dal sensore è intrinsecamente molto esigua, è fondamentale adottare un valore di resistenza estremamente elevato per ottenere un segnale 
+        in tensione con una dinamica apprezzabile e facilmente rilevabile. Per questo motivo si è optato per una resistenza di conversione pari a 
+        $1\text{ M}\Omega$, la quale garantisce un'escursione termica del segnale di diversi volt anche a fronte di deboli irraggiamenti causati da fiamme distanti.
         
+    \newpage
+
+    \subsection{2$^\circ$ e 4$^\circ$ STADIO - Disaccoppiatore di rete}
+        Gli stadi di trasduzione (1), filtraggio (3) e integrazione/decisione (5-6) richiedono un dimensionamento
+        indipendente per preservare le rispettive risposte in frequenza e costanti di tempo. Affinché la loro
+        interconnessione in cascata non alteri le funzioni di trasferimento locali, è indispensabile introdurre un
+        meccanismo di isolamento, tecnicamente definito \textbf{disaccoppiamento d'impedenza}. 
+
+        Nelle catene analogiche, l'accoppiamento ideale si realizza interponendo uno stadio che presenti un'impedenza
+        d'ingresso tendente al circuito aperto (valore teoricamente infinito) e un'impedenza d'uscita tendente al cortocircuito
+        (valore teoricamente nullo). La topologia ottimale per adempiere a questa funzione è l'amplificatore operazionale in
+        configurazione \textbf{voltage follower} (o inseguitore di tensione, implementato nei blocchi \texttt{AMP1} e \texttt{AMP2}).
+        Questa struttura replica fedelmente sul terminale d'uscita la tensione applicata all'ingresso (guadagno unitario, $A_v = 1$),
+        garantendo al contempo le proprietà impedenziali necessarie a eliminare l'effetto di carico tra i moduli passivi.
+
+    \subsection{3$^\circ$ STADIO - Filtro Passa-Basso}
+        Questo stadio è posto in cascata all'ingresso unicamente per filtrare tutto il rumore in alta frequenza che non ci interessa.
+        Ovviamente questa assunzione si può fare nel momento in cui, dopo aver analizzato lo spettro dinamico di una fiamma, ci rendiamo
+        conto che lo sfarfallio (\textit{flickering}) macroscopico della stessa introduce una modulazione del segnale elettrico a bassissima
+        frequenza (stimata tra 1 e 2 Hz) e a questo punto allora possiamo concludere che lo stadio di filtraggio dovrà prevedere un filtro
+        passa-basso con una banda passante che si aggiri intorno alla frequenza individuata precedentemente.
+
+        Per realizzare questo stadio abbiamo bisogno di un resistore ($R_2$) e di un condensatore ($C_1$) da dimensionare opportunamente.
+        Tenendo conto che la frequenza di taglio di un filtro passa-basso si trova come:
+
+        \begin{equation}
+            \boxed{f_T = \frac{1}{2\pi RC}}
+        \end{equation}
+
+        e che la resistenza deve essere dimensionata opportunamente per non limitare o aumentare troppo la corrente passante in questo stadio
+        (un buon valore di compromesso è stato individuato intorno ai 3 k$\Omega$), bisogna trovare una dimensione di capacità del condensatore
+        che ci permetta di poter trovare una $f_T$ che si aggira al di sotto dei 3-4 Hz. E' stata scelta la capacità commerciale di 22 $\mu$F che ci dà quindi
+        una $f_T \approx 2.41 Hz$, perfettamente in accordo con il valore ricercato.
+
+        \begin{figure}[H]
+        \centering
+        \begin{tikzpicture}
+            \begin{axis}[
+                width=11cm, height=6.5cm,   % Leggermente più alto visto che è singolo
+                xmode=log,                  % Asse X logaritmico
+                xmin=0.01, xmax=1000,         % Range frequenze da 1 Hz a 10 kHz
+                xlabel={Frequenza [Hz]},
+                ylabel={Magnitudo [dB]},
+                ymin=-40, ymax=5,
+                ytick={-30, -20, -10, -3, 0}, % Tick a -3 dB per la frequenza di taglio
+                grid=both,
+                minor grid style={dashed, gray!30},
+                major grid style={gray!60},
+                tick label style={font=\footnotesize},
+                label style={font=\small}
+            ]
+            
+            % Funzione analitica del solo filtro passa-basso: 1 / sqrt(1 + (2*pi*x*tau)^2)
+            \addplot[red, thick, domain=0.01:1000, samples=200] 
+                {20*log10( 1 / sqrt(1 + (2*pi*x*0.066)^2) )};
+                
+            \end{axis}
+        \end{tikzpicture}
+        
+        % PROPRIETÀ INLINE: Applica la formattazione solo a questa caption
+        \captionsetup{justification=centering, singlelinecheck=false, font=small}
+        \caption{Diagramma di Bode (Modulo) del filtro passa-basso}
+        \label{fig:bode_passabasso_modulo}
+        \end{figure}
+    
     \subsection{5$^\circ$ STADIO - Debouncer analogico}
+        Il quinto blocco funzionale costituisce l'elemento centrale per la sicurezza e l'immunità ai falsi allarmi dell'intera architettura analogica. 
+        Denominato 'Debouncer Analogico', questo stadio ha il compito di discriminare gli impulsi luminosi intensi ma transitori (quali il flash di una 
+        fotocamera, variazioni repentine dell'illuminazione ambientale o riflessi solari momentanei) da un incendio effettivo, il quale presenta una 
+        persistenza temporale macroscopica.
 
-    \subsection{6$^\circ$ STADIO - Comparatore}
+        La topologia circuitale è basata su una rete passiva integratrice $R_3 - C_2$, interposta tra l'uscita a bassa impedenza del secondo buffer 
+        (\texttt{AMP2}) e l'ingresso ad alta impedenza del comparatore finale (\texttt{AMP3}). Grazie al perfetto disaccoppiamento d'impedenza garantito 
+        dagli operazionali a monte e a valle, il comportamento dinamico di questo stadio è isolato e governato esclusivamente dai valori dei suoi due componenti passivi.
 
-    \subsection{Attuatore - lo stadio finale}
-\subsection{Ambiti di applicazione}
+        Quando il fotodiodo rileva una sorgente IR stabile e il segnale supera il filtraggio iniziale, l'uscita di \texttt{AMP2} si porta repentinamente 
+        al valore di regime alto, che approssimiamo alla tensione di alimentazione del sistema ($V_s \approx V_{max} = +5\text{ V}$). Il condensatore $C_2$, 
+        inizialmente scarico, non asseconda istantaneamente il gradino di tensione ma comincia ad accumulare carica elettrica attraverso il resistore $R_3$. 
+        La transizione della tensione ai capi del condensatore ($V_{C2}$) nel dominio del tempo risponde alla legge esponenziale costitutiva dei circuiti $RC$:
 
+        \begin{equation}
+            V_{C2}(t) = V_{max} \cdot \left(1 - e^{-\frac{t}{\tau_2}}\right)
+        \end{equation}
 
+        dove $\tau_2 = R_3 \cdot C_2$ rappresenta la costante di tempo intrinseca del debouncer. Per adempiere alla funzione di anti-falso allarme, questa costante 
+        viene dimensionata in modo da essere significativamente più grande rispetto alla costante $\tau_1$ del filtro passa-basso precedente. Nel nostro caso, 
+        avendo selezionato i valori commerciali di $R_3 = 10\text{ k}\Omega$ e $C_2 = 100\,\mu\text{F}$, la costante di tempo risulta:
 
-\subsection{Verifica e sperimentazione}
+        \begin{equation}
+            \tau_2 = 10.000\,\Omega \cdot 100 \cdot 10^{-6}\text{ F} = 1\text{ s}
+        \end{equation}
 
+        L'efficacia di questa scelta progettuale si traduce direttamente in una protezione bidirezionale del sistema:
+        
+        \begin{itemize}
+            \item \textbf{Comportamento ai transitori veloci (Disturbi):} Se la sorgente IR subisce un'attivazione impulsiva (durata $\Delta t \ll \tau_2$), la tensione 
+                $V_{C2}(t)$ sale solo di una piccola frazione di volt. Non appena l'impulso cessa, il condensatore si scarica rapidamente attraverso $R_3$ verso l'uscita 
+                di \texttt{AMP2} (che nel frattempo è tornata a $0\text{V}$), impedendo alla tensione di raggiungere la soglia di scatto del comparatore.
+            \item \textbf{Comportamento a segnali persistenti (Incendio reale):} Se l'esposizione della fiamma sul fotodiodo è continua e stabile ($t > \tau_2$), la curva 
+                esponenziale ha il tempo necessario per salire oltre il valore di riferimento $V_{REF}$ impostato sullo stadio successivo, validando l'allarme e abilitando 
+                la commutazione dell'output.
+        \end{itemize}
 
+        In sintesi, lo stadio agisce come un decisore a memoria analogica: accumula l'energia del segnale ottico nel tempo e "accetta" lo stimolo come un incendio reale 
+        solo se quest'ultimo dimostra una persistenza fisica coerente con il fenomeno macroscopico di una combustione.
+
+    \subsection{6$^\circ$ STADIO - Comparatore di Soglia e Output}
+        Il sesto stadio del circuito di condizionamento è deputato alla conversione del segnale analogico integrato in un segnale digitale binario ($0\text{V}$ o $+5\text{V}$), 
+        idoneo a pilotare in totale sicurezza lo stadio attuatore a valle. Questa funzione di decisione logica viene assolta dall'ultimo amplificatore operazionale (\texttt{AMP3}), 
+        configurato come \textbf{comparatore di soglia in anello aperto} (open-loop).
+
+        Grazie alla configurazione ad anello aperto, l'operazionale non presenta alcuna rete di retroazione tra l'uscita e gli ingressi. Di conseguenza, il componente esprime il suo
+        massimo guadagno differenziale ($A_{ol} \to \infty$). Una minima differenza di potenziale tra i suoi due terminali d'ingresso porta istantaneamente l'uscita in saturazione 
+        positiva o negativa, azzerando le zone di incertezza elettrica.
+
+        Il terminale non-invertente ($+$) di \texttt{AMP3} è collegato direttamente al nodo del debouncer analogico, ricevendone la tensione esponenziale $V_{C2}(t)$. Il terminale invertente
+        ($-$) è invece vincolato a una tensione di riferimento costante $V_{REF}$ (impostabile fisicamente tramite un partitore resistivo o un potenziometro di precisione). Il comportamento 
+        dell'uscita finale $V_{out}$ risponde rigorosamente alla seguente legge matematica:
+        
+        \begin{equation}
+            V_{out} = 
+            \begin{cases} 
+            V_{OH} \approx +5\text{V} & \text{se } V_{C2}(t) > V_{REF} \quad \text{(Allarme: Fiamma validata)} \\ 
+            V_{OL} \approx 0\text{V} & \text{se } V_{C2}(t) < V_{REF} \quad \text{(Sicurezza: Riposo o disturbo isolato)} 
+            \end{cases}
+        \end{equation}
+
+        L'interazione analitica tra lo stadio integratore (Debouncer) e il comparatore permette di calcolare esattamente il tempo minimo di esposizione continua alla fiamma ($t_{min}$)
+        necessario a far scattare il sistema di sicurezza. Sostituendo la legge di carica del condensatore nella condizione di scatto $V_{C2}(t) = V_{REF}$, si ottiene:
+
+        \begin{equation}
+            V_{REF} = V_{max} \cdot \left(1 - e^{-\frac{t_{min}}{R_3 C_2}}\right)
+        \end{equation}
+
+        Esplicitando l'equazione rispetto alla variabile temporale $t_{min}$ tramite l'applicazione delle proprietà dei logaritmi naturali, si ricava la relazione fondamentale di dimensionamento:
+        
+        \begin{equation}
+            \boxed{t_{min} = -R_3 C_2 \cdot \ln\left(1 - \frac{V_{REF}}{V_{max}}\right)}
+        \end{equation}
+
+        Questa formula evidenzia l'estrema versatilità del circuito: mantenendo fissi i componenti passivi del debouncer ($R_3 = 10\text{ k}\Omega$ e $C_2 = 100\,\mu\text{F}$, da cui $\tau_2 = 1\text{ s}$), 
+        è possibile tarare il tempo di reazione del sistema semplicemente calibrando la tensione di soglia $V_{REF}$. Ad esempio, impostando una $V_{REF} = 3.16\text{ V}$ (pari a circa il $63.2\%$ di 
+        $V_{max} = 5\text{V}$), il logaritmo assume valore unitario e il tempo di esposizione richiesto coinciderà esattamente con la costante di tempo dello stadio precedente ($t_{min} = \tau_2 = 1\text{ s}$). 
+
+        La commutazione netta così ottenuta garantisce che l'attuatore finale riceva un comando privo di ambiguità, salvaguardando i dispositivi di potenza da stati di parziale conduzione lineare.
+
+    \subsection{Attuatore - Interfaccia di potenza e logica di accoppiamento}
+        L'uscita del comparatore di soglia (\texttt{AMP3}) fornisce un segnale logico binario ben definito: assume il valore di massa ($0\text{V}$) in condizioni 
+        di riposo e il valore massimo di alimentazione ($V_{max}$) in caso di allarme validato. Tuttavia, questo segnale possiede soltanto un'informazione di tipo 
+        logico-informativo e non l'energia fisica necessaria a compiere un lavoro meccanico o idraulico. Gli amplificatori operazionali, infatti, sono strutturalmente 
+        progettati per elaborare segnali e non per erogare correnti elevate; se si tentasse di collegare direttamente l'uscita del comparatore a un carico reale (un attuatore), 
+        l'operazionale subirebbe un drastico crollo della tensione d'uscita o un danneggiamento permanente per sovracorrente.
+
+        Per superare questo limite ingegneristico e rendere il sistema autosufficiente, si rende necessaria l'integrazione di uno stadio finale denominato \textbf{Interfaccia di Potenza} 
+        (o \textit{Driver} di potenza), il cui compito è separare nettamente la logica di controllo a bassa corrente dal circuito di attuazione ad alta corrente.
+
+        \subsubsection{Il principio dell'Interruttore Elettronico Controllato}
+            Il metodo più efficiente e lineare per realizzare questa trasformazione consiste nell'utilizzare un \textbf{transistore di potenza} operante in regime di commutazione 
+            (ovvero come interruttore statico). Questo dispositivo può essere immaginato idealmente come un interruttore a tre terminali:
+            
+            \begin{itemize}
+                \item \textbf{Terminale di Controllo (Ingresso):} Connesso all'uscita $V_{out}$ del comparatore, pilota l'apertura o la chiusura del canale assorbendo una corrente praticamente nulla.
+                \item \textbf{Terminale di Potenza (Uscita):} Collegato in serie al carico d'interesse.
+                \item \textbf{Terminale di Riferimento:} Vincolato alla massa comune (\texttt{GND}) del sistema.
+            \end{itemize}
+
+            Il vantaggio fondamentale di questa configurazione risiede nella capacità del terminale di controllo di governare il passaggio di flussi di corrente molto elevati nel circuito di uscita, 
+            attingendo l'energia da una linea di alimentazione ausiliaria dedicata, senza gravare sulla sensibile elettronica di condizionamento a monte.
+
+        \subsubsection{Logica di funzionamento e stati di commutazione}
+            Una volta interposta questa interfaccia, l'attivazione dell'attuatore risponde a due precisi regimi fisici:
+            
+            \begin{itemize}
+                \item \textbf{Stato di Interdizione (Condizione di Riposo):} Quando il circuito non rileva emergenze, il comparatore mantiene $V_{out} = 0\text{V}$. Il terminale di controllo del transistore 
+                    non riceve alcuna sollecitazione energetica. L'interruttore elettronico rimane conseguentemente \textbf{aperto}. In questo stato, il circuito di potenza è interrotto, la corrente non può 
+                    scorrere e l'attuatore rimane spento e in totale sicurezza.
+                \item \textbf{Stato di Conduzione (Condizione di Allarme):} Al superamento del tempo minimo di esposizione della fiamma sul fotodiodo, $V_{out}$ commuta bruscamente al livello alto ($V_{max}$). 
+                    Questa tensione eccita il terminale di controllo del transistore, forzando l'interruttore elettronico a \textbf{chiudersi} istantaneamente verso massa. Il circuito di potenza si completa: 
+                    la corrente proveniente dalla sorgente ausiliaria attraversa interamente l'attuatore, attivando immediatamente i sistemi fisici di spegnimento o evacuazione.
+            \end{itemize}
+
+        \subsubsection{Protezione dai transitori induttivi di ritorno}
+            Molti degli attuatori impiegati nei sistemi antincendio reali (quali bobine di elettrovalvole, relè o teleruttori) sono componenti intrinsecamente induttivi. Per le leggi dell'elettromagnetismo, 
+            un'induttanza accumula energia sotto forma di campo magnetico durante la fase di conduzione. 
+
+            Nel momento esatto in cui l'allarme cessa e l'interruttore elettronico si riapre bruscamente per disattivare l'impianto, l'interruzione repentina della corrente genera una forza elettromotrice 
+            inversa macroscopica ($V = L \cdot \frac{di}{dt}$). Questo fenomeno si traduce in una violenta sovratensione riflessa, capace di perforare le giunzioni del transistore e distruggerlo. Per garantire 
+            l'affidabilità a lungo termine dell'architettura, viene inserito un \textbf{elemento di ricircolo unidirezionale} (un diodo di protezione) in parallelo all'attuatore. Questo componente offre una via 
+            di fuga preferenziale e sicura all'energia magnetica residua, smorzando la sovratensione e preservando l'integrità strutturale dell'interfaccia di potenza.
+
+    \subsection{Ambiti di applicazione e scenari operativi}
+        L'architettura analogica modulare analizzata si colloca come soluzione ideale in tutti quegli scenari di sicurezza civile e industriale in cui i sistemi di rilevamento convenzionali (quali i sensori di fumo 
+        ottici a ionizzazione o i rilevatori termici) risultano intrinsecamente inefficienti, tardivi nella risposta o soggetti a continui falsi allarmi a causa delle normali attività ambientali. 
+
+        Il vantaggio competitivo di un'architettura basata sul monitoraggio della radiazione infrarossa vicina (IR-A), assistita da un filtro ottico per la luce diurna e da uno stadio di integrazione temporale 
+        (debouncer), si esprime prevalentemente nei seguenti contesti stazionari:
+
+        \begin{itemize}
+            \item \textbf{Autorimesse e parcheggi sotterranei:} In questi ambienti, la presenza costante di gas di scarico, polveri sottili e vapori genererebbe sistematiche attivazioni improprie nei comuni rilevatori 
+                di fumo. Al contrario, il sistema analogico proposto ignora la presenza di aerosol e corpi particolati in sospensione, reagendo esclusivamente alla firma radiante termica di una combustione attiva.
+            \item \textbf{Locali caldaie e centrali termiche industriali:} Ambienti caratterizzati da repentine variazioni termiche macroscopiche mettono in crisi i sensori di temperatura (termovelocimetrici). Il sensore 
+                ottico, operando alla velocità della luce nella banda IR, garantisce un tempo di intervento quasi istantaneo all'insorgere del focolaio, permettendo l'isolamento immediato delle condotte di combustibile 
+                prima che l'incendio si propaghi.
+            \item \textbf{Aree ad alto affollamento e illuminazione eterogenea:} In strutture quali centri commerciali, teatri o complessi industriali, la presenza di illuminazioni artificiali fluorescenti, LED o a scarica 
+                introduce un forte rumore di fondo a frequenza di rete ($50\text{ Hz}$ / $100\text{ Hz}$). Grazie alla combinazione del filtro passa-basso (che abbatte i disturbi in frequenza) e del debouncer analogico 
+                (che assorbe i transitori luminosi veloci o i riflessi casuali), l'architettura garantisce una continuità di servizio esente da falsi allarmi.
+        \end{itemize}
 
 % ==========================================
-% CONCLUSIONI
+% CONCLUSIONI E SVILUPPI FUTURI
 % ==========================================
+
 \section{Conclusioni e sviluppi futuri}
+    Il lavoro di analisi e progettazione documentato nella presente relazione ha permesso di caratterizzare con successo un'architettura circuitale interamente analogica, dedicata al rilevamento sicuro e tempestivo di fiamme 
+    libere tramite la banda spettrale dell'infrarosso vicino (IR-A). L'intero percorso metodologico ha evidenziato come l'adozione di un approccio modulare a blocchi sequenziali sia la chiave ingegneristica per risolvere problemi 
+    complessi di condizionamento del segnale, trasformando una microscopica fotocorrente parassita in un robusto segnale di potenza capace di governare un attuatore meccanico di evacuazione o estinzione.
 
+    A valle di tutto ciò, l'architettura presenta comunque degli accorgimenti da poter adottare:
 
-
+    \begin{enumerate}
+        \item \textbf{Integrazione a doppia tecnologia (IR / UV):} Per massimizzare l'immunità ai disturbi, il sistema potrebbe essere espanso integrando un secondo canale di trasduzione ottica parallelo, basato su un sensore sensibile alla 
+            radiazione ultravioletta (UV). Convogliando i due output logici a un blocco di commutazione a coincidenza analogica (porta logica AND analogica), l'allarme finale verrebbe abilitato solo se la sorgente emettesse contemporaneamente 
+            nello spettro IR e UV, azzerando la probabilità di falsi allarmi anche negli ambienti industriali più ostili.
+        \item \textbf{Implementazione di un circuito di scarica rapida asimmetrico:} Attualmente, il debouncer analogico presenta lo stesso tempo sia in fase di carica (attivazione dell'allarme) sia in fase di scarica (cessazione dell'allarme). 
+            Inserendo un diodo di bypass in parallelo alla resistenza $R_3$, si potrebbe ottenere un sistema asimmetrico: un tempo di attivazione controllato e lento (es. $1\text{ s}$) associato a uno spegnimento dell'allarme e del sistema di 
+            estinzione pressoché istantaneo non appena la fiamma scompare dal campo visivo del fotodiodo.
+    \end{enumerate}
 
 \end{document}

@@ -1,55 +1,97 @@
 \documentclass{article}
 \usepackage[rightcaption]{sidecap}
-\usepackage{graphicx} 
+\usepackage{graphicx} % Required for inserting images
 \usepackage{multirow}
+\usepackage[top=4cm, bottom=4cm, left=3cm, right=3cm]{geometry}
+\usepackage[labelfont=bf, justification=raggedright, singlelinecheck=false]{caption}
+\usepackage[european, americanvoltages]{circuitikz} % Per i circuiti
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18} % Ottimizza la compatibilità di PGFPlots
+\usepgfplotslibrary{groupplots} % Consente di allineare modulo e fase
 \newcommand\tab[1][1cm]{\hspace*{#1}}
 \usepackage[T1]{fontenc}
 \usepackage{appendix}
 \usepackage{tabularx}
 \usepackage{float}
-\usepackage{eso-pic} 
+\usepackage{tcolorbox}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{eso-pic} % for \BgThispage
 \usepackage{tikz}
-\usepackage{enumitem}
-\usepackage{xcolor-solarized}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usetikzlibrary{arrows.meta}
 \usepackage[pages=some]{background}
 \usepackage[italian]{babel}
-\usepackage{amsmath} % Fornisce il supporto nativo a \text{} e agli ambienti matematici avanzati
-\usepackage{float}
-
+\usepackage[colorlinks=true, linkcolor=black, citecolor=black, filecolor=black, urlcolor=blue]{hyperref}
+\addto\captionsitalian{\renewcommand{\contentsname}{Indice}}
 \backgroundsetup{scale=1.5,anchor=right,angle=0,opacity=0.1,contents={\includegraphics[scale=1]{Misc/logo_standard (1).png}}}
 
-\newcommand{\laplace}{\(F = I (L \cdot B)\)}
-\newcommand{\lorentz}{\(F = q(v \cdot B)\)}
+% FORMATTAZIONE SOTTOTITOLI
+%-----------------------------------------------------------
+\titleformat{\subsection}
+{\normalfont\Large\bfseries}{\thesubsection}{1em}{}
 
+\titleformat{\section}
+{\normalfont\Large\bfseries}{\thesection}{1em}{}
+%-----------------------------------------------------------
+
+% FORMATTAZIONE INDICE
+%-----------------------------------------------------------
+\renewcommand{\cftsecfont}{\normalfont\Large\bfseries}
+\renewcommand{\cftsecpagefont}{\normalfont\Large\bfseries}
+
+\renewcommand{\cftsubsecfont}{\normalfont\Large}
+\renewcommand{\cftsubsecpagefont}{\normalfont\Large}
+
+\setlength{\cftbeforesecskip}{0.5cm} 
+\setlength{\cftbeforesubsecskip}{0.3cm}
+%-----------------------------------------------------------
+
+% TITOLO
+%-----------------------------------------------------------
 \title{
-    Relazione: Caratterizzazione e Controllo di Motori Elettrici tramite Raspberry Pi e Adafruit Motor HAT \\ 
+    Relazione : Caratterizzazione e Controllo di
+    Motori Elettrici tramite Raspberry Pi e
+    Adafruit Motor HAT \\
     \vspace{0.3cm} 
     \Large Gruppo 100
 }
+%-----------------------------------------------------------
+
+% AUTORI
+%-----------------------------------------------------------
 \author{
-  Lorenzo Allocco \\ -- Mat. 061270XXXX
-  \and
+  Lorenzo Allocco \\ -- Mat. 0612709084
+  \\ \\
   Riccardo La Porta \\ -- Mat. 0612709691
-  \and 
-  Francesco Grimaldi \\ -- Mat.0612708839
-  \and
-  Alessandro Altieri \\ -- Mat.0612709239
+  \\ \\
+  Francesco Grimaldi \\ -- Mat. 0612708839
+  \\ \\
+  Alessandro Altieri \\ -- Mat. 0612709239
 }
-\date{5 Marzo 2026}
+
+\date{13 Giugno 2026}
 
 \begin{document}
+\BgThispage
 
-\AddToShipoutPictureBG*{%
+\AddToShipoutPictureBG*{
   \begin{tikzpicture}[remember picture, overlay]
     \node [anchor=north west, inner sep=30pt] at (current page.north west)
       {\includegraphics[height=1.5cm]{Misc/diem (1).png}};
   \end{tikzpicture}
 }
-\BgThispage
+%-----------------------------------------------------------
+
 \maketitle
+
+% INDICE
+%-----------------------------------------------------------
 \newpage
 \tableofcontents
 \newpage
+%-----------------------------------------------------------
 
 \section{Obiettivi dell'esperienza}
 La presente relazione ha l'obiettivo di analizzare e descrivere il principio di funzionamento e le modalità di controllo digitale di due differenti tipologie di attuatori elettrici: un motore in corrente continua a magneti permanenti e un motore passo-passo (Stepper) bipolare. Nello specifico, l'esperienza si è focalizzata sull'impiego di un sistema basato su piattaforma \textbf{Raspberry Pi} accoppiato alla scheda di espansione \textbf{Adafruit DC and Stepper Motor HAT}, approfondendo i seguenti aspetti operativi:
@@ -62,10 +104,10 @@ La presente relazione ha l'obiettivo di analizzare e descrivere il principio di 
 \section{Introduzione e cenni teorici}
 Il motore a corrente continua (DC) converte l'energia elettrica in ingresso in energia meccanica rotazionale basandosi sulla legge della forza di Laplace:
 \begin{center}
-\laplace
+$\mathcal{L}$
 \end{center}
 
-All'equilibrio elettrico di regime, la tensione d'armatura $V_a$ applicata ai morsetti è bilanciata dalla caduta sulla resistenza interna e dalla forza contro-elettromotrice $E$ indotta dal movimento del rotore:
+\noindent All'equilibrio elettrico di regime, la tensione d'armatura $V_a$ applicata ai morsetti è bilanciata dalla caduta sulla resistenza interna e dalla forza contro-elettromotrice $E$ indotta dal movimento del rotore:
 $$V_a = R_a I_a + E$$
 Dato che $E = K_e \cdot \omega$ (dove $K_e$ è la costante di forza contro-elettromotrice e $\omega$ la velocità angolare), in condizioni di funzionamento a vuoto la corrente $I_a$ assorbita assume valori minimi trascurabili, rendendo la velocità di rotazione direttamente proporzionale alla tensione applicata: $V_a \approx K_e \cdot \omega$.
 
@@ -79,7 +121,7 @@ Per invertire il verso di rotazione di un motore in corrente continua è necessa
     \label{fig:mia_immagine}
 \end{figure}
 
-Il circuito è costituito da quattro interruttori elettronici disposti in coppia su due rami verticali, con il motore posizionato sul ramo centrale trasversale, come in Figura 1. Nell'hardware Adafruit impiegato, tali interruttori sono costituiti da MOSFET di potenza integrati nel chipset \textbf{TB6612}. Il funzionamento si articola in quattro stati logici fondamentali:
+\noindent Il circuito è costituito da quattro interruttori elettronici disposti in coppia su due rami verticali, con il motore posizionato sul ramo centrale trasversale, come in Figura 1. Nell'hardware Adafruit impiegato, tali interruttori sono costituiti da MOSFET di potenza integrati nel chipset \textbf{TB6612}. Il funzionamento si articola in quattro stati logici fondamentali:
 \begin{enumerate}
 \item \textbf{Marcia Avanti:} Chiudendo l'interruttore in alto a sinistra (S1) e quello in basso a destra (S4), la corrente attraversa il motore da sinistra a destra.
 \item \textbf{Marcia Indietro:} Chiudendo l'interruttore in alto a destra (S2) e quello in basso a sinistra (S3), la polarità si inverte e la corrente scorre da destra a sinistra.
@@ -94,7 +136,7 @@ $$D = \frac{T_{\text{on}}}{T} \cdot 100\%$$
 La tensione media equivalente applicata sarà pari a: $V_{\text{media}} = D \cdot V_{\text{max}}$.
 
 
-Poiché la CPU del Raspberry Pi non possiede un numero sufficiente di timer hardware per generare molteplici canali PWM indipendenti, l'Adafruit HAT introduce a bordo un chip dedicato: il \textbf{PCA9685}, mostrato in figura 2. Questo controller comunica con il Raspberry Pi tramite bus seriale \textbf{I2C} (usando solo i pin SDA e SCL) e genera autonomamente i segnali PWM necessari a piloterare i ponti ad H (contrassegnati dalla figura 2 sottostante dal colore verde) con una risoluzione a 8-bit (circa 256 livelli di velocità stabili, pari a incrementi dello 0.5\%).
+\noindent Poiché la CPU del Raspberry Pi non possiede un numero sufficiente di timer hardware per generare molteplici canali PWM indipendenti, l'Adafruit HAT introduce a bordo un chip dedicato: il \textbf{PCA9685}, mostrato in figura 2. Questo controller comunica con il Raspberry Pi tramite bus seriale \textbf{I2C} (usando solo i pin SDA e SCL) e genera autonomamente i segnali PWM necessari a piloterare i ponti ad H (contrassegnati dalla figura 2 sottostante dal colore verde) con una risoluzione a 8-bit (circa 256 livelli di velocità stabili, pari a incrementi dello 0.5\%).
 
 \begin{figure}[H]
     \centering
@@ -103,7 +145,7 @@ Poiché la CPU del Raspberry Pi non possiede un numero sufficiente di timer hard
     \label{fig:mia_immagine}
 \end{figure}
 
-Il collegamento del motore in corrente continua (DC) alla scheda di espansione avviene tramite una delle quattro morsettiere a vite dedicate, contrassegnate nell'immagine in rosso, dalle sigle da \texttt{M1} a \texttt{M4} (ad esempio, i due terminali del motore vengono inseriti nei due contatti di \texttt{M1}). Poiché il motore DC a spazzole non ha una polarità rigida, l'ordine dei fili non è vincolante: un'eventuale inversione determinerà semplicemente l'inversione del verso di rotazione iniziale, parametro comunque modificabile via software tramite il segno del comando \textit{throttle}. È fondamentale, inoltre, collegare una sorgente di alimentazione esterna (es. 12VDC) alla morsettiera a vite a 2 pin dedicata ai motori presente sul HAT, rispettando la polarità positiva e negativa. Questo passaggio è cruciale per separare la corrente di potenza richiesta dai motori dall'alimentazione logica del Raspberry Pi, evitando pericolosi ritorni di corrente o cali di tensione sul microcontrollore.
+\noindent Il collegamento del motore in corrente continua (DC) alla scheda di espansione avviene tramite una delle quattro morsettiere a vite dedicate, contrassegnate nell'immagine in rosso, dalle sigle da \texttt{M1} a \texttt{M4} (ad esempio, i due terminali del motore vengono inseriti nei due contatti di \texttt{M1}). Poiché il motore DC a spazzole non ha una polarità rigida, l'ordine dei fili non è vincolante: un'eventuale inversione determinerà semplicemente l'inversione del verso di rotazione iniziale, parametro comunque modificabile via software tramite il segno del comando \textit{throttle}. È fondamentale, inoltre, collegare una sorgente di alimentazione esterna (es. 12VDC) alla morsettiera a vite a 2 pin dedicata ai motori presente sul HAT, rispettando la polarità positiva e negativa. Questo passaggio è cruciale per separare la corrente di potenza richiesta dai motori dall'alimentazione logica del Raspberry Pi, evitando pericolosi ritorni di corrente o cali di tensione sul microcontrollore.
 
 \subsection{Il Motore Passo-Passo (Stepper) e Stili di Avanzamento}
 \begin{figure}[H]
@@ -113,7 +155,9 @@ Il collegamento del motore in corrente continua (DC) alla scheda di espansione a
     \label{fig:mia_immagine}
 \end{figure}
 
-Il motore passo-passo si muove per scatti discreti azionando in sequenza temporale i campi magnetici delle sue bobine interne. disposte come in figura 3. L'accoppiamento tra il Raspberry Pi e l'HAT consente di sfruttare quattro modalità di stepping software native:
+\newpage
+
+\noindent Il motore passo-passo si muove per scatti discreti azionando in sequenza temporale i campi magnetici delle sue bobine interne. disposte come in figura 3. L'accoppiamento tra il Raspberry Pi e l'HAT consente di sfruttare quattro modalità di stepping software native:
 
 
 \begin{itemize}
@@ -122,7 +166,6 @@ Il motore passo-passo si muove per scatti discreti azionando in sequenza tempora
 \item \textbf{Interleaved Step (\texttt{stepper.INTERLEAVE}):} Alterna passi a bobina singola a passi a doppia bobina. Questa configurazione implementa l'avanzamento ad \textbf{Half-Step} (mezzo passo), dimezzando l'angolo geometrico fondamentale e raddoppiando la risoluzione dello spostamento.
 \item \textbf{Microstepping (\texttt{stepper.MICROSTEP}):} Il controller PCA9685 modula la corrente nelle bobine tramite segnali PWM sinusoidali cooperanti. La transizione tra i passi non è più netta ma graduale, massimizzando la fluidità dinamica e minimizzando le risonanze meccaniche.
 \end{itemize}
-\newpage
 
 \section{Strumentazione e Componenti}
 L'architettura hardware predisposta per l'esecuzione dell'esperienza comprende i seguenti elementi:
@@ -148,8 +191,8 @@ Multimetro digitale & / &Misurazione dei livelli di tensione e delle polarità e
 
 \subsection{Connessioni Elettriche}
 L'Adafruit Motor HAT è stato inserito direttamente sul connettore GPIO a 40 pin del Raspberry Pi, stabilendo il collegamento per i segnali d'interfaccia I2C (SDA e SCL), la massa comune e l'alimentazione logica a 3.3V. 
-
-L'alimentatore da banco esterno è stato connesso alla morsettiera dedicata ai motori dell'HAT. I carichi sono stati cablati come segue:
+\\ \\
+\noindent L'alimentatore da banco esterno è stato connesso alla morsettiera dedicata ai motori dell'HAT. I carichi sono stati cablati come segue:
 \begin{enumerate}
 \item I due terminali del motore DC sono stati collegati alla morsettiera di uscita contrassegnata come \textbf{M1}.
 \item Le due coppie di fasi del motore passo-passo bipolare sono state collegate ai blocchi terminali combinati \textbf{M1} e \textbf{M2}
@@ -165,13 +208,7 @@ Il controllo degli attuatori è stato eseguito in ambiente Linux tramite script 
 \newpage
 
 \section{Raccolta e Analisi dei Dati Sperimentali}
-Di seguito il report dei dati raccolti mediante l'uso dell'oscilloscopio sui diversi motori.
-
-\subsection{Dati Rilevati sul Motore DC}
-
-
-\subsection{Dati Rilevati sul Motore Stepper}
-
+  QUESTA SEZIONE SARA' PRESA DA UN ALTRO PDF E VERRA' FATTO IL MERGE CON QUESTO
 
 \newpage
 
@@ -179,18 +216,21 @@ Di seguito il report dei dati raccolti mediante l'uso dell'oscilloscopio sui div
 
 \subsection{Comportamento Dinamico del Motore DC}
 Dall'analisi del grafico di linearità si evince che impostando un valore di \textit{throttle} pari a 0.1 (tensione ai morsetti pari a 1.2 V), il motore non avvia la propria rotazione, facendo registrare una velocità pari a 0 RPM. Tale comportamento evidenzia sperimentalmente la presenza della \textbf{zona morta} dell'attuatore, determinata dalla necessità di accumulare una coppia sufficiente a vincere le forze d'attrito statico di primo distacco presenti sui cuscinetti. 
-
-Per valori di comando superiori o uguali a 0.2, la curva tensione-velocità assume un andamento prettamente lineare. Questo trend convalida sperimentalmente l'equazione semplificata di funzionamento a vuoto del motore DC ($V_a \approx K_e \cdot \omega$), confermando che il controllo di velocità in anello aperto tramite la regolazione del Duty Cycle del chip PCA9685 risulta efficace e stabile.
+\\ \\
+\noindent Per valori di comando superiori o uguali a 0.2, la curva tensione-velocità assume un andamento prettamente lineare. Questo trend convalida sperimentalmente l'equazione semplificata di funzionamento a vuoto del motore DC ($V_a \approx K_e \cdot \omega$), confermando che il controllo di velocità in anello aperto tramite la regolazione del Duty Cycle del chip PCA9685 risulta efficace e stabile.
 
 \subsection{Valutazione delle Modalità di Stepping del Motore Passo-Passo}
 Le prove sperimentali condotte sul motore Stepper hanno evidenziato una netta correlazione tra lo stile di pilotaggio software impostato e le performance meccaniche dell'albero:
-* Nelle modalità \textbf{\texttt{SINGLE}} e \textbf{\texttt{DOUBLE}}, l'invio di una sequenza di 200 impulsi ha completato esattamente una rotazione completa di 360$^{\circ}$, convalidando l'accuratezza dell'angolo di passo nominale di 1.8$^{\circ}$. Il pilotaggio a doppia bobina (\texttt{DOUBLE}) ha evidenziato una maggiore rigidità e resistenza alla perdita del passo se sottoposto a carichi torsionali manuali esterni.
-* La modalità \textbf{\texttt{INTERLEAVE}} (Half-Step) ha richiesto l'esecuzione di 400 sotto-passi per completare un giro intero, confermando il dimezzamento dell'angolo di scomposizione spaziale a 0.9$^{\circ}$. Dinamicamente si è osservata una riduzione drastica dello scottonamento tipico dei passi pieni.
-* La modalità \textbf{\texttt{MICROSTEP}} ha esibito la massima fluidità di rotazione, assimilabile a quella continua di un motore DC a spazzole, eliminando quasi del tutto le vibrazioni acustiche e i picchi di risonanza sull'albero.
+
+\begin{itemize}
+  \item Nelle modalità \textbf{\texttt{SINGLE}} e \textbf{\texttt{DOUBLE}}, l'invio di una sequenza di 200 impulsi ha completato esattamente una rotazione completa di 360$^{\circ}$, convalidando l'accuratezza dell'angolo di passo nominale di 1.8$^{\circ}$. Il pilotaggio a doppia bobina (\texttt{DOUBLE}) ha evidenziato una maggiore rigidità e resistenza alla perdita del passo se sottoposto a carichi torsionali manuali esterni.
+  \item La modalità \textbf{\texttt{INTERLEAVE}} (Half-Step) ha richiesto l'esecuzione di 400 sotto-passi per completare un giro intero, confermando il dimezzamento dell'angolo di scomposizione spaziale a 0.9$^{\circ}$. Dinamicamente si è osservata una riduzione drastica dello scottonamento tipico dei passi pieni.
+  \item La modalità \textbf{\texttt{MICROSTEP}} ha esibito la massima fluidità di rotazione, assimilabile a quella continua di un motore DC a spazzole, eliminando quasi del tutto le vibrazioni acustiche e i picchi di risonanza sull'albero.
+\end{itemize}
 
 \section{Conclusioni}
 L'esperienza condotta ha consentito di testare con successo l'efficacia del controllo di attuatori elettromeccanici mediante un computer a scheda singola ad alte prestazioni (Raspberry Pi) accoppiato a un'architettura hardware dedicata basata sui chip specialistici TB6612 e PCA9685. 
-
-Il motore DC si è dimostrato ideale per applicazioni in cui è richiesta la regolazione continua della velocità tramite variazione del Duty Cycle, a patto di compensare via software la non-linearità introdotta dalla zona morta iniziale. Il motore passo-passo, di contro, ha confermato le sue eccellenti doti di posizionatore ad alta precisione in anello aperto; l'utilizzo delle funzionalità di microstepping offerte dall'HAT Adafruit rappresenta la scelta ottimale qualora l'applicazione industriale richieda fluidità di movimento e assenza di vibrazioni meccaniche.
+\\ \\
+\noindent Il motore DC si è dimostrato ideale per applicazioni in cui è richiesta la regolazione continua della velocità tramite variazione del Duty Cycle, a patto di compensare via software la non-linearità introdotta dalla zona morta iniziale. Il motore passo-passo, di contro, ha confermato le sue eccellenti doti di posizionatore ad alta precisione in anello aperto; l'utilizzo delle funzionalità di microstepping offerte dall'HAT Adafruit rappresenta la scelta ottimale qualora l'applicazione industriale richieda fluidità di movimento e assenza di vibrazioni meccaniche.
 
 \end{document}
